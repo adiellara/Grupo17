@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <html>
+        <head>
+            <title>Order Status</title>
+        </head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <body>
+            <div class="container">
+                <h1>Estatus Orden</h1>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID ORDEN</th>
+                            <th>Customer Name</th>
+                            <th>Current Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Cristian</td>
+                            <td>NEW</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Susana</td>
+                            <td>PROCESSING</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Karla Estefany</td>
+                            <td>DELIVERED</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Example form for updating status (e.g., for an admin) -->
+
+            <form action="/order/${order.id}/updateStatus" method="post">
+                <div class="form-group">
+                    <div class="container">
+                        <label for="newStatus">Update Status:</label>
+                        <select id="newStatus" name="newStatus">
+                            <option value="NEW">New</option>
+                            <option value="PROCESSING">Processing</option>
+                            <option value="SHIPPED">Shipped</option>
+                            <option value="DELIVERED">Delivered</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </div>
+            </form>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pago con Tarjeta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap para responsividad -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f9fafc;
+        }
+        .card-form {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .form-control:focus {
+            box-shadow: 0 0 4px #007bff;
+        }
+        .btn-primary {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card-form">
+    <h3 class="text-center mb-4">Pago con Tarjeta</h3>
+
+    <form th:action="@{/pago}" th:object="${pago}" method="post">
+
+        <div class="mb-3">
+            <label class="form-label">Nombre del Titular</label>
+            <input type="text" th:field="*{nombreTitular}" class="form-control" placeholder="Ej. Juan Pérez">
+            <div class="text-danger" th:if="${#fields.hasErrors('nombreTitular')}" th:errors="*{nombreTitular}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Número de Tarjeta</label>
+            <input type="text" th:field="*{numeroTarjeta}" class="form-control" placeholder="1111 2222 3333 4444">
+            <div class="text-danger" th:if="${#fields.hasErrors('numeroTarjeta')}" th:errors="*{numeroTarjeta}"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Expiración (MM/AA)</label>
+                <input type="text" th:field="*{fechaExpiracion}" class="form-control" placeholder="12/26">
+                <div class="text-danger" th:if="${#fields.hasErrors('fechaExpiracion')}" th:errors="*{fechaExpiracion}"></div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">CVV</label>
+                <input type="text" th:field="*{cvv}" class="form-control" placeholder="123">
+                <div class="text-danger" th:if="${#fields.hasErrors('cvv')}" th:errors="*{cvv}"></div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Monto</label>
+            <input type="number" step="0.01" th:field="*{monto}" class="form-control" placeholder="Ej. 99.99">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Pagar</button>
+
+        <div th:if="${mensaje}" class="alert alert-success mt-3 text-center" th:text="${mensaje}"></div>
+    </form>
+</div>
+
+</body>
+</html>
+
+
+<!--<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Credit Card Payment</title>
+       <link rel="stylesheet" type="text/css" th:href="@{/css/creditCard.css}" />
+    </head>
+    <body>
+        <h1 style="text-align: center;">Ingrese Datos de la Tarjeta</h1>
+        <form th:action="@{/processPayment}" th:object="${creditCardForm}" method="post">
+            <div>
+                <label for="cardNumber">Card Number:</label>
+                <input type="text" id="cardNumber" th:field="*{cardNumber}" />
+                <span th:if="${#fields.hasErrors('cardNumber')}" th:errors="*{cardNumber}">Card Number Error</span>
+            </div>
+            <div>
+                <label for="cardholderName">Cardholder Name:</label>
+                <input type="text" id="cardholderName" th:field="*{cardholderName}" />
+                <span th:if="${#fields.hasErrors('cardholderName')}" th:errors="*{cardholderName}">Cardholder Name Error</span>
+            </div>
+            <div>
+                <label for="expMonth">Expiration Month (MM):</label>
+                <input type="text" id="expMonth" th:field="*{expMonth}" />
+                <span th:if="${#fields.hasErrors('expMonth')}" th:errors="*{expMonth}">Exp Month Error</span>
+            </div>
+            <div>
+                <label for="expYear">Expiration Year (YYYY):</label>
+                <input type="text" id="expYear" th:field="*{expYear}" />
+                <span th:if="${#fields.hasErrors('expYear')}" th:errors="*{expYear}">Exp Year Error</span>
+            </div>
+            <div>
+                <label for="cvv">CVV:</label>
+                <input type="text" id="cvv" th:field="*{cvv}" />
+                <span th:if="${#fields.hasErrors('cvv')}" th:errors="*{cvv}">CVV Error</span>
+            </div>
+            <button type="submit">Realizar Pago</button>
+        </form>
+    </body>
+</html>-->
