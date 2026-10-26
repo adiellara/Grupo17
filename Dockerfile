@@ -1,23 +1,21 @@
-# Fase 1: Compilación con Maven y Java 8
-FROM maven:3.8.8-eclipse-temurin-8-alpine AS build
+# Fase 1: Compilación usando Maven con JDK 17 (soporta cifrado TLS moderno)
+FROM maven:3.9-eclipse-temurin-17-alpine AS build
 WORKDIR /app
 
 # Copia los archivos del proyecto
 COPY pom.xml .
 COPY src ./src
 
-# Compila y empaqueta el proyecto omitiendo los tests
+# Compila y empaqueta la aplicación
 RUN mvn clean package -DskipTests
 
-# Fase 2: Ejecución del JAR
+# Fase 2: Ejecución en JRE 8
 FROM eclipse-temurin:8-jre-alpine
 WORKDIR /app
 
-# Copia el ejecutable .jar generado desde la fase de build
+# Copia el archivo .jar generado
 COPY --from=build /app/target/*.jar app.jar
 
-# Expone el puerto por defecto
 EXPOSE 8080
 
-# Ejecuta la aplicación Spring Boot
 ENTRYPOINT ["java", "-jar", "app.jar"]
