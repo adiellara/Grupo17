@@ -1,0 +1,15 @@
+# Compilación local / cache
+target/
+.git/
+.idea/
+.vscode/
+*.iml
+*.class
+*.log
+
+# Dependencias de Maven
+.mvn/wrapper/*.jar
+
+# Archivos locales del entorno
+.env
+.env.*
