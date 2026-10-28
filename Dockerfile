@@ -1,22 +1,20 @@
-# Etapa de compilación
-FROM maven:3.9-eclipse-temurin-17 AS build
+# Fase 1: Compilación con Maven y JDK 17
+FROM maven:3.9-eclipse-temurin-17-alpine AS build
 WORKDIR /app
 
-COPY pom.xml ./
-COPY .mvn/ .mvn/
-COPY mvnw ./
-RUN chmod +x mvnw
+COPY pom.xml .
 COPY src ./src
 
-RUN ./mvnw clean package -DskipTests
+# Se usa mvn instalado en la imagen en lugar de ./mvnw
+RUN mvn clean package -DskipTests
 
-# Etapa de ejecución
-FROM eclipse-temurin:17-jre-jammy
+# Fase 2: Ejecución en JRE 8
+FROM eclipse-temurin:8-jre-alpine
 WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
 
 ENV PORT=8080
 EXPOSE 8080
 
-COPY --from=build /app/target/*.jar app.jar
-
-ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-Xms128m", "-Xmx384m", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-Xms128m", "-Xmx384m", "-jar", "app.jar"]
