@@ -27,10 +27,7 @@ cp .env.example .env
 La app usa estas variables:
 
 ```bash
-PORT=8080
-SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/foodapp
-SPRING_DATASOURCE_USERNAME=root
-SPRING_DATASOURCE_PASSWORD=root
+
 ```
 
 Importante:
@@ -55,15 +52,8 @@ Importante:
    - `SPRING_DATASOURCE_USERNAME`
    - `SPRING_DATASOURCE_PASSWORD`
    - `PORT`
-3. Usa el `Dockerfile` del proyecto o el build nativo de Java si prefieres.
+3. Usa el `Dockerfile` del proyecto o el build nativo.
 
-## Buenas prácticas revisadas
-- Se eliminó la configuración con credenciales embebidas y se reemplazó por variables de entorno.
-- El proceso de despliegue ya está preparado para Render.
-- La app tiene un `Dockerfile` listo para contenedores.
-- El proyecto usa `spring.datasource.hikari.*` para controlar conexiones.
-- La configuración de JPA está preparada para producción con `spring.jpa.open-in-view=false`.
-- Se recomienda mantener secrets fuera del repositorio y usar variables de entorno en cloud.
 
 ## Estructura del proyecto
 ```bash
