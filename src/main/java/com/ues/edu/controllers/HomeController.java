@@ -7,7 +7,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.ues.edu.entities.Product;
+import com.ues.edu.entities.User;
 import com.ues.edu.loginCredentials.AdminLogin;
+import com.ues.edu.loginCredentials.UserLogin;
 import com.ues.edu.services.ProductServices;
 /**
  * Modulo Bienvenida
@@ -48,7 +50,15 @@ public class HomeController
 	@GetMapping("/login")
 	public String login(Model model)
 	{
-		model.addAttribute("adminLogin",new AdminLogin());
+		model.addAttribute("adminLogin", new AdminLogin());
+		model.addAttribute("userLogin", new UserLogin());
 		return "Login";
+	}
+
+	@GetMapping("/register")
+	public String register(Model model)
+	{
+		model.addAttribute("user", new User());
+		return "register";
 	}
 }

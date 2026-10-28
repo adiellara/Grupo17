@@ -1,52 +1,112 @@
 <!DOCTYPE html>
-  <html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
 	<meta charset="UTF-8" />
-	<title>FoodApp</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Ingresar | FoodApp</title>
 	<link rel="icon" type="image/x-icon" href="./img/b.png">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-	<link rel="stylesheet" href="" th:href="@{/css/Navigation.css}" />
-	<link rel="stylesheet" href="" th:href="@{/css/Login.css}" />
+	<link rel="stylesheet" th:href="@{/css/Navigation.css}" />
+	<link rel="stylesheet" th:href="@{/css/Login.css}" />
 </head>
+<body class="auth-body">
+	<nav th:replace="~{Navigation::navbar()}"></nav>
 
-<body>
-	<nav th:replace="~{Navigation::navbar()}">
-	</nav>
-	<div class="LoginContainer">
-		<div class="admin">
-			<div class="content">
-				<strong style="font-size: 16px;margin-bottom: 0px;">BUSINESS</strong>
-				<h2><span style="color:green;">Administradores</span></h2>
-
-				<form th:action="@{/adminLogin}" method="post">
-					<b>Email :</b>
-					<input type="email" name="email" placeholder="Enter email..." class="email"> <br />
-					<b>Password:</b>
-					<input type="password" name="password" placeholder="Enter password" class="password">
-					<small style="color: red;" th:text="${error}"></small><br />
-					<button type="submit" class="loginButton">Log in</button>
-				</form>
+	<main class="auth-page">
+		<section class="auth-shell">
+			<div class="auth-brand">
+				<p class="auth-kicker">FoodApp</p>
+				<h1>Bienvenido de nuevo</h1>
+				<p>Inicia sesión para pedir, seguir tus órdenes y usar la plataforma. Si aún no tienes cuenta, créala en un minuto.</p>
 			</div>
-		</div>
-		<div class="user">
-			<div class="content">
-                            <strong style="font-size: 16px;margin-bottom: 0px;">CUSTOMERS</strong>
-				<h2><span style="color:green;">Usuarios</span></h2>
-				<form th:action="@{/userLogin}" method="post" class="form">
-					<b>Email :</b>
-					<input type="email" name="userEmail" placeholder="Enter email"><br />
 
-					<b>Password:</b>
-					<input type="password" name="userPassword" placeholder="Enter password" required maxlength="8" minlength="4" class="userPassword"><br />
+			<div class="auth-card">
+				<div class="auth-tabs" role="tablist">
+					<button type="button" class="auth-tab" id="tab-user" data-target="panel-user" th:classappend="${error == null} ? 'is-active' : ''">Cliente</button>
+					<button type="button" class="auth-tab" id="tab-admin" data-target="panel-admin" th:classappend="${error != null} ? 'is-active' : ''">Administrador</button>
+				</div>
 
-					<small style="color: red;" th:text="${error2}"></small><br />
-					<button type="submit" class="loginButton">Log in</button><br>
+				<p class="auth-alert auth-alert-ok" th:if="${success}" th:text="${success}"></p>
 
-					   <!--<p>I don't have an account? <a href="register.html" style="color: green;">Register Here</a></p>-->
-				</form>
+				<div class="auth-panel" id="panel-user" th:classappend="${error != null} ? 'is-hidden' : ''">
+					<h2>Ingreso de clientes</h2>
+					<p class="auth-subtitle">Usa el correo con el que te registraste.</p>
+					<p class="auth-alert" th:if="${error2}" th:text="${error2}"></p>
+
+					<form th:action="@{/userLogin}" method="post" class="auth-form">
+						<label for="userEmail">Correo electrónico</label>
+						<input id="userEmail" type="email" name="userEmail" placeholder="tucorreo@ejemplo.com" required autocomplete="username">
+
+						<label for="userPassword">Contraseña</label>
+						<div class="password-field">
+							<input id="userPassword" type="password" name="userPassword" placeholder="Tu contraseña" required minlength="4" autocomplete="current-password">
+							<button type="button" class="toggle-password" data-target="userPassword" aria-label="Mostrar contraseña">
+								<i class="fa-solid fa-eye"></i>
+							</button>
+						</div>
+
+						<button type="submit" class="auth-submit">Entrar</button>
+					</form>
+
+					<p class="auth-switch">
+						¿No tienes cuenta?
+						<a th:href="@{/register}">Crear un usuario</a>
+					</p>
+				</div>
+
+				<div class="auth-panel" id="panel-admin" th:classappend="${error == null} ? 'is-hidden' : ''">
+					<h2>Ingreso de administradores</h2>
+					<p class="auth-subtitle">Acceso al panel de gestión.</p>
+					<p class="auth-alert" th:if="${error}" th:text="${error}"></p>
+
+					<form th:action="@{/adminLogin}" method="post" class="auth-form">
+						<label for="adminEmail">Correo electrónico</label>
+						<input id="adminEmail" type="email" name="email" placeholder="admin@ejemplo.com" required autocomplete="username">
+
+						<label for="adminPassword">Contraseña</label>
+						<div class="password-field">
+							<input id="adminPassword" type="password" name="password" placeholder="Tu contraseña" required autocomplete="current-password">
+							<button type="button" class="toggle-password" data-target="adminPassword" aria-label="Mostrar contraseña">
+								<i class="fa-solid fa-eye"></i>
+							</button>
+						</div>
+
+						<button type="submit" class="auth-submit">Entrar como admin</button>
+					</form>
+				</div>
 			</div>
-		</div>
-	</div>
+		</section>
+	</main>
+
+	<script>
+		document.querySelectorAll('.auth-tab').forEach(function (tab) {
+			tab.addEventListener('click', function () {
+				document.querySelectorAll('.auth-tab').forEach(function (item) {
+					item.classList.remove('is-active');
+				});
+				document.querySelectorAll('.auth-panel').forEach(function (panel) {
+					panel.classList.add('is-hidden');
+				});
+				tab.classList.add('is-active');
+				document.getElementById(tab.dataset.target).classList.remove('is-hidden');
+			});
+		});
+
+		document.querySelectorAll('.toggle-password').forEach(function (button) {
+			button.addEventListener('click', function () {
+				var input = document.getElementById(button.dataset.target);
+				var icon = button.querySelector('i');
+				if (input.type === 'password') {
+					input.type = 'text';
+					icon.classList.remove('fa-eye');
+					icon.classList.add('fa-eye-slash');
+				} else {
+					input.type = 'password';
+					icon.classList.remove('fa-eye-slash');
+					icon.classList.add('fa-eye');
+				}
+			});
+		});
+	</script>
 </body>
-
-</html>30
+</html>

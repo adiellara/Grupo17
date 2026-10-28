@@ -35,6 +35,10 @@ public class UserServices {
         return user;
     }
 
+    public boolean emailExists(String email) {
+        return this.userRepository.findUserByUemail(email) != null;
+    }
+
     public void updateUser(User user, int id) {
         user.setU_id(id);
         this.userRepository.save(user);

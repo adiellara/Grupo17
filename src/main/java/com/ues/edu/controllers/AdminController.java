@@ -49,8 +49,10 @@ public class AdminController {
         if (adminServices.validateAdminCredentials(email, password)) {
             return "redirect:/admin/services";
         } else {
-            model.addAttribute("error", "Invalid email or password");
-             return "redirect:/admin/services";
+            model.addAttribute("error", "Correo o contraseña de administrador no válidos.");
+            model.addAttribute("adminLogin", new AdminLogin());
+            model.addAttribute("userLogin", new UserLogin());
+            return "Login";
         }
 
     }
@@ -67,7 +69,9 @@ public class AdminController {
             model.addAttribute("name", user.getUname());
             return "BuyProduct";
         } else {
-            model.addAttribute("error2", "Invalid email or password");
+            model.addAttribute("error2", "Correo o contraseña no válidos.");
+            model.addAttribute("adminLogin", new AdminLogin());
+            model.addAttribute("userLogin", new UserLogin());
             return "Login";
         }
 
