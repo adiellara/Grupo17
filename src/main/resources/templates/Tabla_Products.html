@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visualizar Productos Guardados - FoodApp</title>
+    <!-- FontAwesome y Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Tabla_Products.css}" />
+</head>
+
+<body>
+
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR ALINEADA CON LA INTERFAZ DE FOODAPP -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="brand-title">FoodApp</span>
+        </div>
+        <div class="nav-user">
+            <span class="welcome-text">Bienvenido, Admin!</span>
+            <a th:href="@{/logout}" class="btn-logout">Cerrar sesión</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        
+        <!-- ENLACE DE REGRESO -->
+        <div class="top-bar">
+            <a class="btn-back" th:href="@{/admin/services}">
+                <i class="fa-solid fa-arrow-left"></i> Regresar a Servicios
+            </a>
+        </div>
+
+        <!-- SECCIÓN 1: BUSCADOR DE PRODUCTOS -->
+        <section class="card-box search-card">
+            <h2 class="section-title text-blue">
+                <i class="fa-solid fa-magnifying-glass"></i> Product Search
+            </h2>
+            <form th:action="@{/admin/products/search}" method="get" class="search-form">
+                <div class="input-group">
+                    <input type="text" name="productName" placeholder="Enter product name..." required class="search-input"/>
+                    <button type="submit" class="btn btn-blue">
+                        Search
+                    </button>
+                    <a th:href="@{/admin/products}" class="btn btn-secondary">
+                        Mostrar Todos
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <!-- SECCIÓN 2: CATÁLOGO Y ACCIONES DE PRODUCTOS -->
+        <section class="card-box products-card">
+            <div class="card-header">
+                <h2 class="section-title text-green">
+                    <i class="fa-solid fa-boxes-stacked"></i> Productos Guardados
+                </h2>
+                <a th:href="@{/addProduct}" class="btn btn-green btn-add">
+                    <i class="fa-solid fa-square-plus"></i> Añadir Nuevo Producto
+                </a>
+            </div>
+
+            <!-- GRID DE PRODUCTOS -->
+            <div class="product-grid">
+                <div class="product-card" th:each="product : ${products}">
+                    <div class="product-header">
+                        <span class="product-id" th:text="'ID: #' + ${product.pid}">ID: #1</span>
+                        <span class="product-badge">Disponible</span>
+                    </div>
+
+                    <h3 th:text="${product.pname}" class="product-name">Nombre del Producto</h3>
+
+                    <div class="product-details">
+                        <p class="product-price">
+                            <span class="price-label">Precio:</span>
+                            <span class="price-amount" th:text="'$' + ${#numbers.formatDecimal(product.pprice, 1, 2)}">$0.00</span>
+                        </p>
+                    </div>
+
+                    <div class="card-actions">
+                        <a th:href="@{'/updateProduct/' + ${product.pid}}" class="btn-action edit-btn">
+                            <i class="fa-solid fa-pen"></i> Editar
+                        </a>
+                        <a th:href="@{'/deleteProduct/' + ${product.pid}}" 
+                           class="btn-action delete-btn"
+                           onclick="return confirm('¿Está seguro de que desea eliminar este producto?');">
+                            <i class="fa-solid fa-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MENSAJE EN CASO DE NO HABER RESULTADOS -->
+            <div th:if="${#lists.isEmpty(products)}" class="no-results">
+                <i class="fa-solid fa-box-open empty-icon"></i>
+                <p>No se encontraron productos registrados en el catálogo.</p>
+            </div>
+        </section>
+
+    </div>
+
+</body>
+</html>

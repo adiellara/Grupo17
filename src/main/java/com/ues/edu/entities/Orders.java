@@ -2,15 +2,24 @@ package com.ues.edu.entities;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
+ * Entidad de Órdenes / Pedidos del sistema SIPAGO.
+ *
  * @author Edith Estefany Vanegas Albánez
  */
 @Entity
@@ -18,24 +27,40 @@ import javax.persistence.Table;
 public class Orders {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int oId;
+
+    @Column(nullable = false, length = 150)
     private String oName;
+
+    @Column(nullable = false)
     private double oPrice;
+
+    @Column(nullable = false)
     private int oQuantity;
+
+    @Temporal(TemporalType.TIMESTAMP)
     private Date orderDate;
+
+    @Column(nullable = false)
     private double totalAmmout;
 
-    @ManyToOne
-    @JoinColumn(name = "user_u_id")
+    @Column(nullable = false)
+    private boolean activo = true;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "user_u_id", nullable = false)
+    @JsonIgnoreProperties({"orders", "upassword"})
     private User user;
 
-    public Date getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(Date orderDate) {
-        this.orderDate = orderDate;
+    @PrePersist
+    protected void onCreate() {
+        if (this.orderDate == null) {
+            this.orderDate = new Date();
+        }
+        if (this.totalAmmout <= 0 && this.oPrice > 0 && this.oQuantity > 0) {
+            this.totalAmmout = Math.round((this.oPrice * this.oQuantity) * 100.0) / 100.0;
+        }
     }
 
     public int getoId() {
@@ -70,12 +95,12 @@ public class Orders {
         this.oQuantity = oQuantity;
     }
 
-    public User getUser() {
-        return user;
+    public Date getOrderDate() {
+        return orderDate;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setOrderDate(Date orderDate) {
+        this.orderDate = orderDate;
     }
 
     public double getTotalAmmout() {
@@ -86,10 +111,26 @@ public class Orders {
         this.totalAmmout = totalAmmout;
     }
 
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
         return "Orders [oId=" + oId + ", oName=" + oName + ", oPrice=" + oPrice + ", oQuantity=" + oQuantity
-                + ", orderDate=" + orderDate + ", totalAmmout=" + totalAmmout + ", user=" + user + "]";
+                + ", orderDate=" + orderDate + ", totalAmmout=" + totalAmmout + ", activo=" + activo
+                + ", userId=" + (user != null ? user.getU_id() : null) + "]";
     }
-
 }

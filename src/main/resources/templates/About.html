@@ -1,355 +1,132 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8" />
-        <title>FoodApp</title>
-        <link rel="icon" type="image/x-icon" href="./Images/logo.png">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-        <link rel="stylesheet" href="" th:href="@{/css/Navigation.css}" />
-        <link rel="stylesheet" href="" th:href="@{/css/About.css}" /> 
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <!--<link rel="stylesheet" type="text/css" href="abc.css"> -->
-        <style type="text/css">
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap');
-            *
-            {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-                font-family: 'Poppins',sans-serif;
-            }
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sobre Nosotros - SIPAGO | FoodApp</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" th:href="@{/css/Navigation.css}" />
+    <link rel="stylesheet" th:href="@{/css/About.css}" />
+</head>
+<body>
+    <nav th:replace="~{Navigation::navbar()}"></nav>
 
-            .contact
-            {
-                position: relative;
-                min-height: 100vh;
-                padding: 50px 100px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
-                background:#222 ;
-            }
-            .contact .content h2{
+    <main class="about-section">
+        <!-- Encabezado y Visión del Proyecto -->
+        <header class="about-header">
+            <span class="about-badge"><i class="fa-solid fa-lightbulb"></i> Conoce Nuestro Proyecto</span>
+            <h1>Visión del Proyecto SIPAGO</h1>
+            <p>
+                <strong>FoodApp (SIPAGO)</strong> es una plataforma web diseñada para optimizar la gestión gastronómica
+                y el procesamiento de pedidos. Con una arquitectura segura basada en roles, agiliza la interacción
+                entre clientes, catálogo de productos y administración operativa desde cualquier dispositivo.
+            </p>
+        </header>
 
-                font-size:3em;
-                color: #FFFFFF;
-                font-weight: 500;
-
-            }
-            .contact .content p
-            {
-                color: #FFFFFF;
-                font-size: 1.1em;
-                font-weight: 300;
-            }
-            .container
-            {
-                width:100% ;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 50px;
-
-                margin-top: 30px;
-            }
-            .container .contactInfo
-            {
-                width: 50%;
-                display: flex;
-                flex-direction: column;
-            }
-            .container .contactInfo .box
-            {
-                position: relative;
-                padding: 20px 0;
-                display: flex;
-                cursor: pointer;
-
-            }
-            .container .contactInfo .box .icon
-            {
-                position: relative;
-                min-width: 60px;
-                height: 60px;
-                background: repeating-conic-gradient(from 27.5deg,crimson 0%,crimson 10%, transparent 10%,transparent 50%);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-            .container .contactInfo .box .icon::before
-            {
-                content: '';
-                position: absolute;
-                inset: 0;
-                background: repeating-conic-gradient(from 117.5deg,crimson 0%,crimson 10%, transparent 10%,transparent 50%);
-
-            }
-            .container .contactInfo .box .icon::after
-            {
-                content: '';
-                position: absolute;
-                inset: 2px;
-                background: #222;
-
-            }
-            .container .contactInfo .box .icon b
-            {
-                position: absolute;
-                inset: 8px;
-                background: crimson;
-                z-index: 2;
-            }
-            .container .contactInfo .box .icon i
-            {
-                position: relative;
-                z-index: 1000;
-                color: #333;
-                font-size: 1.25em;
-            }
-            .container .contactInfo .box .text
-            {
-                position: relative;
-                display: flex;
-                flex-direction: column;
-                margin-left: 20px;
-                font-size: 1.1em;
-                color: #fff;
-                font-family: 300;
-
-            }
-            .container .contactInfo .box .text h3
-            {
-                font-weight: 500;
-                color: crimson;
-            }
-            .container .contactInfo .txt
-            {
-                color: #fff;
-                margin-top: 50px;
-                font-weight: 500;
-                border-left: 50px solid crimson;
-                padding-left: 10px;
-                line-height: 1em;
-            }
-            .container .contactInfo .sci
-            {
-                position: relative;
-                display: flex;
-                gap: 30px;
-                margin: 20px 0;
-            }
-            .container .contactInfo .sci li
-            {
-                list-style: none;
-            }
-            .container .contactInfo .sci li a
-            {
-                color: #fff;
-                font-size: 1.5em;
-                transition: 0.25s;
-            }
-            .container .contactInfo .sci li a:hover
-            {
-                color: crimson;
-                filter: drop-shadow(0 0 5px crimson);
-            }
-            .container .contactForm
-            {
-                position: relative;
-                width: 40%;
-                background: repeating-conic-gradient(from var(--a),crimson 0%,crimson 10%, transparent 10%,transparent 50%);
-                animation: animate 6s linear infinite;
-                padding: 60px;
-            }
-            .container .contactForm::before
-            {
-                content: '';
-                position: absolute;
-                inset: 0;
-                background: repeating-conic-gradient(from var(--a),crimson 0%,crimson 10%, transparent 10%,transparent 50%);
-                animation: animate 20s linear infinite;
-                animation-delay: -1.5s;
-            }
-            .container .contactForm::after
-            {
-                content: '';
-                position: absolute;
-                inset: 2px;
-                border: 20px solid #222;
-                background: #333;
-
-            }
-            @property <!--a -->
-            {
-                syntax: '<angle>';
-                inherits: false;
-                initial-value: 0deg;
-            }
-            @keyframes animate
-            {
-                0%
-                {
-                    --a:0deg;
-                }
-                100%
-                {
-                    --a:3600deg;
-                }
-            }
-            .container .contactForm form
-            {
-                position: relative;
-                z-index: 10;
-            }
-            .container .contactForm form h2
-            {
-                font-size: 2em;
-                color: #fff;
-                font-weight: 500s;
-            }
-            .container .contactForm form .inputBox
-            {
-                position: relative;
-                width: 100%;
-                margin-top: 20px;
-            }
-            .container .contactForm form .inputBox input ,
-            .container .contactForm form .inputBox textarea
-            {
-                width: 100% !important;
-                padding: 5px 0;
-                font-size: 1.1em;
-                margin: 10px 0;
-                border: none;
-                background: transparent;
-                border-bottom: 2px solid crimson;
-                color: #fff;
-                outline: none;
-                resize: none;
-            }
-            .container .contactForm form .inputBox span
-            {
-                position: absolute;
-                left: 0;
-                pointer-events: none;
-                padding: 5px 0;
-                margin: 10px 0;
-                font-size: 1.1em;
-                color: #fff;
-                transition: 0.5s;
-            }
-            .container .contactForm form .inputBox input:focus ~ span ,
-            .container .contactForm form .inputBox textarea:focus ~span ,
-            .container .contactForm form .inputBox input:focus ~ span ,
-            .container .contactForm form .inputBox textarea:focus ~span
-            {
-                color: crimson;
-                font-size: 0.9em;
-                transform: translateY(-24px);
-            }
-            .container .contactForm form .inputBox input[type="submit"]
-            {
-                width: 100%;
-                background: crimson;
-                color: #222;
-                border: none;
-                cursor: pointer;
-                padding: 10px;
-                font-size: 1.1em;
-                font-weight: 500;
-            }
-            /* Responsive Styles */
-            @media (max-width: 991px) {
-                .contact {
-                    padding: 50px;
-                }
-
-                .container {
-                    flex-direction: column;
-                }
-
-                .container .contactInfo,
-                .container .contactForm {
-                    width: 100%;
-                }
-
-                .container .contactForm {
-                    padding: 40px;
-                }
-
-                .container .contactForm form {
-                    padding: 30px;
-                }
-            }
-
-
-
-        </style>
-
-    </head>
-    <body>
-        <nav th:replace="~{Navigation::navbar()}"></nav>
-        <section class="contact"> 
-            <div class="content"> 
-                <h2>Vision del Proyecto</h2>  
-                <p>FoodApp es una aplicación web diseñada para revolucionar la gestión de la industria alimentaria. Con su interfaz intuitiva, optimiza las operaciones mediante la gestión fluida de datos de clientes, inventario y pedidos. Esta solución integral garantiza una toma de decisiones eficiente y ofrece accesibilidad desde cualquier dispositivo, mejorando la productividad en el dinámico sector alimentario..
-                </p>
-            </div> 
-            <div class="container"> 
-                <div class="contactInfo"> 
-                    <div class="box"> 
-                        <div class="icon"><b></b><i class="fa-sharp fa-solid fa-location-dot"></i></div> 
-                        <div class="text"> 
-                            <h3>Direccion</h3> 
-                            <p>Final, 25 Av. Norte, <br>San Salvador,<br>El Salvador</p>
-                        </div>
-                    </div> 
-                    <div class="box"> 
-                        <div class="icon"><b></b><i class="fa-solid fa-phone"></i></div> 
-                        <div class="text"> 
-                            <h3>Telefono</h3> 
-                            <p>123456789</p>
-                        </div>
-                    </div> 
-                    <div class="box"> 
-                        <div class="icon"><b></b><i class="fa-solid fa-envelope"></i></div> 
-                        <div class="text"> 
-                            <h3>Email</h3> 
-                            <p>dg12003@ues.edu.sv</p>
-                        </div>
-                    </div> 
-                    <div class="contactForm"> 
-
-                        <form> 
-                            <h2>Send Message</h2> 
-                            <div class="inputBox"> 
-                                <input type="text" name="" required="required"> 
-                                <span>Full Name</span>
-                            </div> 
-                            <div class="inputBox"> 
-                                <input type="text" name="" required="required"> 
-                                <span>Email</span>
-                            </div> 
-                            <div class="inputBox"> 
-                                <textarea required="required"></textarea>
-                                <span>Type your message...</span>
-                            </div> 
-                            <div class="inputBox"> 
-                                <input type="submit" value="Send"> 
-                            </div>
-                        </form>
-
-                    </div>
-                    <h2 class="txt">Connect with us</h2>
-                    <ul class="sci">  
-                        <li><a href="#"><i class="fa-brands fa-facebook-f"></i></a></li> 
-                        <li><a href="#"><i class="fa-brands fa-linkedin-in"></i></a></li> 
-                        <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li> 
-                        <li><a href="#"><i class="fa-brands fa-x-twitter"></i></a></li>
-                    </ul>
-                </div>  
+        <!-- Tarjetas de Pilares del Sistema -->
+        <section class="pillars-grid">
+            <div class="pillar-card">
+                <i class="fa-solid fa-bolt pillar-icon"></i>
+                <h3>Pedidos Ágiles</h3>
+                <p>Búsqueda rápida de platillos, cálculo automático de totales y seguimiento transparente de órdenes.</p>
+            </div>
+            <div class="pillar-card">
+                <i class="fa-solid fa-shield-halved pillar-icon"></i>
+                <h3>Seguridad y Auditoría</h3>
+                <p>Control estricto de sesiones por perfil, protección contra caché y trazabilidad administrativa.</p>
+            </div>
+            <div class="pillar-card">
+                <i class="fa-solid fa-mobile-screen-button pillar-icon"></i>
+                <h3>Diseño Adaptable</h3>
+                <p>Interfaz intuitiva accesible desde computadoras de escritorio, tabletas y teléfonos móviles.</p>
             </div>
         </section>
-    </body>
+
+        <!-- Contenedor de 2 Columnas: Información de Contacto + Formulario -->
+        <section class="contact-wrapper">
+            <!-- Columna Izquierda: Datos Institucionales -->
+            <div class="contact-info">
+                <h2>Información de Contacto</h2>
+                <p class="info-sub">¿Tienes consultas o sugerencias sobre la plataforma? Contáctanos directamente.</p>
+
+                <div class="info-box">
+                    <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+                    <div class="info-text">
+                        <h3>Dirección</h3>
+                        <p>Final 25 Av. Norte, Universidad de El Salvador,<br>San Salvador, El Salvador</p>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+                    <div class="info-text">
+                        <h3>Teléfono</h3>
+                        <p>+503 2225-1500</p>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
+                    <div class="info-text">
+                        <h3>Correo Electrónico</h3>
+                        <p>dg12003@ues.edu.sv</p>
+                    </div>
+                </div>
+
+                <div class="social-block">
+                    <h4>Síguenos en redes</h4>
+                    <ul class="social-links">
+                        <li><a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a></li>
+                        <li><a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a></li>
+                        <li><a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a></li>
+                        <li><a href="#" aria-label="X Twitter"><i class="fa-brands fa-x-twitter"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Formulario de Mensaje -->
+            <div class="contact-form-card">
+                <h2>Envíanos un Mensaje</h2>
+                <form id="contactForm" onsubmit="enviarMensaje(event)">
+                    <div class="form-group">
+                        <label for="contactName">Nombre Completo</label>
+                        <input type="text" id="contactName" placeholder="Ej. Carlos De León" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactEmail">Correo Electrónico</label>
+                        <input type="email" id="contactEmail" placeholder="tu.correo@ejemplo.com" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactMsg">Mensaje o Consulta</label>
+                        <textarea id="contactMsg" rows="4" placeholder="Escribe aquí tu comentario..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-send-msg">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Mensaje
+                    </button>
+
+                    <div id="msgFeedback" class="msg-feedback" style="display: none;">
+                        <i class="fa-solid fa-circle-check"></i> ¡Gracias! Tu mensaje ha sido enviado correctamente.
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function enviarMensaje(event) {
+            event.preventDefault();
+            const feedback = document.getElementById('msgFeedback');
+            feedback.style.display = 'flex';
+            document.getElementById('contactForm').reset();
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 4500);
+        }
+    </script>
+</body>
 </html>

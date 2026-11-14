@@ -1,30 +1,143 @@
-<!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.com">
-
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8" />
-	<title>FoodApp</title>
-	<link rel="icon" type="image/x-icon" href="./Images/logo.png">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-	<link rel="stylesheet" href="" th:href="@{/css/Navigation.css}" />
-	<link rel="stylesheet" href="" th:href="@{css/Home.css}" />
-	<style>
-		body{
-			background-image: url('./Images/istockphoto-1006271368-612x612.jpg'); 
-			 background-size: cover; 
-        
-    
-		}
-	</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIPAGO - FoodApp | Inicio</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" th:href="@{/images/logo.png}" />
+
+    <!-- Font Awesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Estilos locales -->
+    <link rel="stylesheet" th:href="@{/css/Navigation.css}" />
+    <link rel="stylesheet" th:href="@{/css/Home.css}" />
 </head>
 
 <body>
-	<nav th:replace="~{Navigation::navbar()}"></nav>
-	<div class="text">
-	<h1 >Bienvenido a Food App! </h1>
-	<h3 >Cuando la calidad conoce la Innovacion! <br /> Explora las opciones que tenemos para ti.</h3>
-	</div>
-	
-</body>
+    <!-- Barra de navegación principal -->
+    <nav th:replace="~{Navigation :: navbar}"></nav>
 
+    <main class="home-wrapper">
+        <!-- Contenedor Principal Glassmorphism -->
+        <section class="hero-card">
+            <div class="hero-header">
+                <span class="badge-pill"><i class="fa-solid fa-utensils"></i> Sistema de Pedidos SIPAGO</span>
+                <h1>¡Bienvenido a FoodApp!</h1>
+                <p class="subtitle">Cuando la calidad conoce la innovación. Selecciona una pestaña para explorar nuestros servicios.</p>
+            </div>
+
+            <!-- MENÚ DE PESTAÑAS INTERACTIVAS (Cumple observación del tutor) -->
+            <div class="home-tabs" role="tablist">
+                <button type="button" class="home-tab-btn active" onclick="openHomeTab('tab-explore', this)">
+                    <i class="fa-solid fa-compass"></i> Inicio y Accesos
+                </button>
+                <button type="button" class="home-tab-btn" onclick="openHomeTab('tab-menu', this)">
+                    <i class="fa-solid fa-burger"></i> Especialidades
+                </button>
+                <button type="button" class="home-tab-btn" onclick="openHomeTab('tab-tracking', this)">
+                    <i class="fa-solid fa-truck-fast"></i> Flujo de Pedido
+                </button>
+                <button type="button" class="home-tab-btn" onclick="openHomeTab('tab-roles', this)">
+                    <i class="fa-solid fa-user-shield"></i> Perfiles de Acceso
+                </button>
+            </div>
+
+            <!-- PESTAÑA 1: ACCESOS RÁPIDOS -->
+            <div id="tab-explore" class="home-tab-panel active">
+                <div class="quick-grid">
+                    <a th:href="@{/login}" class="quick-card">
+                        <div class="icon-circle bg-gold"><i class="fa-solid fa-cart-shopping"></i></div>
+                        <h3>Ordenar Ahora</h3>
+                        <p>Inicia sesión como cliente para buscar productos y generar tu orden.</p>
+                        <span class="card-link">Ir a Ordenar <i class="fa-solid fa-arrow-right"></i></span>
+                    </a>
+
+                    <a th:href="@{/products}" class="quick-card">
+                        <div class="icon-circle bg-green"><i class="fa-solid fa-book-open"></i></div>
+                        <h3>Ver Catálogo</h3>
+                        <p>Consulta los platillos disponibles, precios actualizados y promociones.</p>
+                        <span class="card-link">Explorar Menú <i class="fa-solid fa-arrow-right"></i></span>
+                    </a>
+
+                    <a th:href="@{/admin}" class="quick-card">
+                        <div class="icon-circle bg-blue"><i class="fa-solid fa-lock"></i></div>
+                        <h3>Panel Administrativo</h3>
+                        <p>Gestión segura de usuarios, productos, órdenes y auditoría.</p>
+                        <span class="card-link">Acceso Admin <i class="fa-solid fa-arrow-right"></i></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 2: ESPECIALIDADES -->
+            <div id="tab-menu" class="home-tab-panel">
+                <div class="info-box">
+                    <h3><i class="fa-solid fa-fire text-gold"></i> Lo más pedido en nuestra cocina</h3>
+                    <div class="highlights-list">
+                        <div class="highlight-item">
+                            <span class="item-title">Platos Fuertes & Combos</span>
+                            <span class="item-desc">Preparación al instante con ingredientes frescos y control de calidad.</span>
+                        </div>
+                        <div class="highlight-item">
+                            <span class="item-title">Entradas y Bebidas</span>
+                            <span class="item-desc">Acompañamientos variados listos para complementar tu orden.</span>
+                        </div>
+                    </div>
+                    <div class="panel-footer-action">
+                        <a th:href="@{/login}" class="btn-cta">Ingresar para hacer mi pedido</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 3: FLUJO DE PEDIDO (TRACKING) -->
+            <div id="tab-tracking" class="home-tab-panel">
+                <div class="info-box">
+                    <h3><i class="fa-solid fa-route text-gold"></i> Seguimiento transparente de tu orden</h3>
+                    <div class="steps-row">
+                        <div class="step-item">
+                            <span class="step-num">1</span>
+                            <h4>Registro</h4>
+                            <p>Seleccionas tus productos y confirmas cantidad.</p>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-num">2</span>
+                            <h4>Preparación</h4>
+                            <p>Cocina recibe la orden en tiempo real.</p>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-num">3</span>
+                            <h4>Entrega</h4>
+                            <p>Validación de pago y entrega inmediata.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 4: PERFILES Y SEGURIDAD -->
+            <div id="tab-roles" class="home-tab-panel">
+                <div class="info-box">
+                    <h3><i class="fa-solid fa-shield-halved text-gold"></i> Arquitectura Basada en Roles</h3>
+                    <p class="role-desc">El sistema garantiza la separación de funciones entre clientes operativos y personal administrativo con sesiones protegidas contra caché y registro de auditoría.</p>
+                    <div class="role-actions">
+                        <a th:href="@{/login}" class="btn-cta">Portal Clientes</a>
+                        <a th:href="@{/admin}" class="btn-cta-outline">Portal Administradores</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function openHomeTab(tabId, btnElement) {
+            document.querySelectorAll('.home-tab-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.home-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+    </script>
+</body>
 </html>

@@ -1,4 +1,118 @@
-body
+body {
+    background-image: url("https://www.thespruceeats.com/thmb/hqqNrNhIpqPqV2u0T0K-IUzUsEo=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SES-cuisine-of-north-india-1957883-d32a933f506d43f59ac38a8eb956884a.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex; /* Para centrar el contenido principal */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Asegura que ocupe toda la altura de la vista */
+    margin: 0;
+    padding: 20px; /* Un poco de padding para que no se pegue a los bordes */
+    background-size: cover; /* Asegura que la imagen de fondo cubra todo */
+    background-position: center; /* Centra la imagen de fondo */
+    font-family: 'Arial', sans-serif; /* Puedes cambiar por una fuente más aesthetic */
+    color: #333; /* Color de texto general */
+}
+
+/* Contenedor del formulario para agrupar y centrar */
+.addProducts {
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente para el formulario */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px; /* Ancho máximo para el formulario */
+    text-align: center;
+}
+
+h3 {
+    font-size: 2.2em; /* Título más grande */
+    color: #4CAF50; /* Un color verde aesthetic */
+    margin-bottom: 30px;
+}
+
+label {
+    display: block; /* Para que cada label ocupe su propia línea */
+    text-align: left;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+textarea {
+    width: calc(100% - 20px); /* Ocupa casi todo el ancho, dejando padding */
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.2em; /* Entradas de texto más grandes */
+    box-sizing: border-box; /* Asegura que padding no aumente el ancho total */
+    transition: border-color 0.3s ease;
+    font-family: 'Arial', sans-serif;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    border-color: #4CAF50; /* Borde al enfocar */
+    outline: none; /* Quita el contorno por defecto */
+}
+
+textarea {
+    resize: vertical; /* Permite redimensionar verticalmente */
+    min-height: 100px; /* Altura mínima para el textarea */
+}
+
+button, .addProducts button { /* Ajusta el selector si tu botón tiene una clase */
+    background-color: #4CAF50; /* Botón verde */
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.3em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 20px;
+}
+
+button:hover, .addProducts button:hover {
+    background-color: #45a049; /* Color más oscuro al pasar el ratón */
+    transform: translateY(-2px); /* Pequeño efecto al pasar el ratón */
+}
+
+/* Estilo para el botón de regresar */
+.regresar-btn { 
+    position: absolute; /* **CLAVE:** Lo saca del flujo normal para posicionarlo libremente */
+    top: 20px;          /* Distancia desde el borde superior */
+    left: 20px;         /* Distancia desde el borde izquierdo */
+    
+    /* Estilos visuales para que se vea como en tu primera captura */
+    background-color: #333; /* Fondo más oscuro y sólido */
+    color: white; /* Texto blanco */
+    padding: 8px 15px; /* Relleno */
+    border-radius: 4px; /* Bordes ligeramente redondeados */
+    text-decoration: none; /* Quita el subrayado del enlace */
+    font-size: 1em;
+    font-weight: bold;
+    z-index: 10; /* Asegura que siempre esté por encima del formulario */
+    transition: background-color 0.2s ease;
+}
+
+.regresar-btn:hover {
+    background-color: #555; /* Oscurece un poco al pasar el mouse */
+}
+
+/* Si usas la etiqueta <p> para los labels, tendrías que cambiar el selector */
+.addProducts p {
+    text-align: center; /* Alinea los textos "Nombre del producto" a la izquierda */
+    margin-bottom: 5px;
+    font-size: 1.1em;
+    color: #555;
+    font-weight: bold;
+}
+/*body
 {
 	background-image: url("https://www.thespruceeats.com/thmb/hqqNrNhIpqPqV2u0T0K-IUzUsEo=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SES-cuisine-of-north-india-1957883-d32a933f506d43f59ac38a8eb956884a.jpg");
 	background-repeat: no-repeat;
@@ -48,4 +162,4 @@ a{
 	background-color: darkslategray;
 	text-decoration: none;
 	
-}
+}*/

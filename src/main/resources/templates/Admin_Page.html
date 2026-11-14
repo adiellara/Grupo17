@@ -1,119 +1,545 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Panel de Administración y Seguridad - SIPAGO</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/Admin_Page.css}" />
+    </head>
 
-<head>
-	<meta charset="UTF-8" />
-	<title>ADMIN PAGE :</title>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-	<link rel="stylesheet" href="" th:href="@{/css/Admin_Page.css}" />
+    <body>
+        <!-- BARRA DE NAVEGACIÓN Y SEGURIDAD SUPERIOR -->
+        <header class="admin-navbar">
+            <div class="nav-brand">
+                <i class="fa-solid fa-shield-halved brand-icon"></i>
+                <div>
+                    <span class="brand-title">SIPAGO Admin</span>
+                    <span class="security-badge"><i class="fa-solid fa-lock"></i> Sesión Protegida</span>
+                </div>
+            </div>
 
-</head>
+            <div class="nav-user-info">
+                <div class="user-pill">
+                    <div class="user-pill">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span th:text="${session.adminLogueado != null ? session.adminLogueado.adminName : 'Administrador'}">Administrador</span>
+                    </div>
+                    <a th:href="@{/admin/logout}" class="logout-btn">
+                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+                    </a>
+                </div>
+        </header>
 
-<body>
-	<a class="back" href="/login">Back</a>
-	<center>
-		<section class="tables">
-			<div class="admins">
-				<h2>Admins :</h2>
-				<table>
-					<tr>
-						<th>Admin_Id</th>
-						<th>Admin_Name</th>
-						<th>Admin_Email</th>
-						<th>Admin_Number</th>
-						<th>Actions</th>
-					</tr>
-					<tr th:each="admin :${admins}">
-						<td th:text="${admin.adminId}"></td>
-						<td th:text="${admin.adminName}"></td>
-						<td th:text="${admin.adminEmail}"></td>
-						<td th:text="${admin.adminNumber}"></td>
-						<td><a style="color: blue;" href="" th:href="@{'/updateAdmin/'+${admin.adminId}}"><i
-									class="fa-solid fa-pen"></i></a><span>&nbsp;</span>
-							<a style="color: red;" href="" th:href="@{'/deleteAdmin/'+${admin.adminId}}"><i
-									class="fa-solid fa-trash"></i></a>
-						</td>
-					</tr>
-				</table>
-				<a href="" class="btns" th:href="@{/addAdmin}">Add_Admin</a>
-			</div>
+        <main class="admin-container">
+            <!-- MENÚ DE PESTAÑAS (TABS) -->
+            <nav class="tabs-bar" role="tablist">
+                <button type="button" class="tab-btn active" data-tab="tab-admins" onclick="switchTab('tab-admins', this)">
+                    <i class="fa-solid fa-user-tie"></i> Administradores
+                    <span class="tab-count" th:text="${#lists.size(admins)}">0</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="tab-users" onclick="switchTab('tab-users', this)">
+                    <i class="fa-solid fa-users"></i> Usuarios y Accesos
+                    <span class="tab-count" th:text="${#lists.size(users)}">0</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="tab-products" onclick="switchTab('tab-products', this)">
+                    <i class="fa-solid fa-utensils"></i> Productos
+                    <span class="tab-count" th:text="${#lists.size(products)}">0</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="tab-orders" onclick="switchTab('tab-orders', this)">
+                    <i class="fa-solid fa-receipt"></i> Órdenes
+                    <span class="tab-count" th:text="${#lists.size(orders)}">0</span>
+                </button>
+                <button type="button" class="tab-btn tab-security" data-tab="tab-audit" onclick="switchTab('tab-audit', this)">
+                    <i class="fa-solid fa-clipboard-check"></i> Auditoría de Seguridad
+                </button>
+            </nav>
 
-			<div class="users" th:object="${userObject}">
-				<h2>Users :</h2>
-				<table>
-					<tr>
-						<th>User_Id</th>
-						<th>User_Name</th>
-						<th>User_Email</th>
-						<th>User_Number</th>
-						<th>Actions</th>
-					</tr>
-					<tr th:each="user :${users}">
-						<td th:text="${user.u_id}"></td>
-						<td th:text="${user.uname}"></td>
-						<td th:text="${user.uemail}"></td>
-						<td th:text="${user.unumber}"></td>
-						<td><a style="color: blue;" href="" th:href="@{'/updateUser/'+${user.u_id}}"><i
-									class="fa-solid fa-pen"></i></a><span>&nbsp;</span>
-							<a style="color: red;" href="" th:href="@{'/deleteUser/'+${user.u_id}}"> <i
-									class="fa-solid fa-trash"></i></a>
-						</td>
-					</tr>
-				</table>
-				<a href="" class="btns" th:href="@{'/addUser'}">Add_User</a>
-			</div>
+            <!-- PESTAÑA 1: ADMINISTRADORES -->
+            <section id="tab-admins" class="tab-panel active">
+                <div class="panel-header">
+                    <div>
+                        <h2>Gestión de Administradores</h2>
+                        <p class="panel-subtitle">Control de cuentas con privilegios elevados en el sistema.</p>
+                    </div>
+                    <a class="btns btn-primary" th:href="@{/addAdmin}">
+                        <i class="fa-solid fa-user-plus"></i> Nuevo Administrador
+                    </a>
+                </div>
 
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Nombre Administrador</th>
+                                <th>Email Administrador</th>
+                                <th>Número Contacto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="admin : ${admins}">
+                                <td th:text="${admin.adminId}"></td>
+                                <td><strong th:text="${admin.adminName}"></strong></td>
+                                <td th:text="${admin.adminEmail}"></td>
+                                <td th:text="${admin.adminNumber}"></td>
+                                <td class="actions-cell">
+                                    <a th:href="@{'/updateAdmin/' + ${admin.adminId}}" class="action edit" title="Editar">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <a href="javascript:void(0);"
+                                       th:data-id="${admin.adminId}"
+                                       onclick="customConfirm('¿Deseas eliminar este administrador?', () => window.location.href = '/deleteAdmin/' + this.getAttribute('data-id'));"
+                                       class="action delete" title="Eliminar">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-			<div class="products">
-				<h2>Products :</h2>
-				<table>
-					<tr>
-						<th>Product_Id</th>
-						<th>Product_Name</th>
-						<th>Product_Price</th>
-						<th>Actions</th>
-					</tr>
-					<tr th:each="product :${products}">
-						<td th:text="${product.pid}"></td>
-						<td th:text="${product.pname}"></td>
-						<td th:text="${product.pprice}"></td>
-						<td><a style="color: blue;" href="" th:href="@{'/updateProduct/'+${product.pid}}"><i
-									class="fa-solid fa-pen"></i></a><span>&nbsp;</span>
-							<a style="color: red;" href="" th:href="@{'/deleteProduct/'+${product.pid}}"><i
-									class="fa-solid fa-trash"></i></a>
-						</td>
-					</tr>
-				</table>
-				<a href="" class="btns" th:href="@{'/addProduct'}">Add_Product</a>
-			</div>
-			
-			<div class="details">
-				<h2>Orders :</h2>
-			<table >
-				<tr>
-					<th>User_Name</th>
-					<th>User_Email</th>
-					<th>Product_Name</th>
-					<th>Product_Price</th>
-					<th>Product_Quantity</th>
-					<th>Total_Ammount</th>
-					<th>Date</th>
-				</tr>
-				<tr th:each="order :${orders}">
-					<td th:text="${order.user.uname}"></td>
-					<td th:text="${order.user.uemail}"></td>
-					<td th:text="${order.oName}"></td>
-					<td th:text="${order.oPrice}"></td>
-					<td th:text="${order.oQuantity}"></td>
-					<td th:text="${order.totalAmmout}"></td>
-					<td th:text="${order.orderDate}"></td>
+            <!-- PESTAÑA 2: USUARIOS -->
+            <section id="tab-users" class="tab-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Control de Usuarios y Estados</h2>
+                        <p class="panel-subtitle">Activación, bloqueo y mantenimiento de cuentas operativas.</p>
+                    </div>
+                    <a class="btns btn-primary" th:href="@{/addUser}">
+                        <i class="fa-solid fa-user-plus"></i> Agregar Usuario
+                    </a>
+                </div>
 
-				</tr>
-			</table>
-		</div>
-		</section>
-	</center>
-	
-</body>
+                <!-- Buscador moderno + filtro -->
+                <div class="filter-search-container">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="userSearchInput"
+                               placeholder="Buscar por nombre o correo..."
+                               class="search-input"
+                               onkeyup="buscarUsuario()">
+                    </div>
 
+                    <div class="filter-container">
+                        <label for="filter">Estado:</label>
+                        <select id="filter" onchange="filtrarUsuarios()">
+                            <option value="todos">Todos los usuarios</option>
+                            <option value="activos">Solo Activos</option>
+                            <option value="inactivos">Solo Inactivos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Usuario</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Estado</th>
+                                <th>Acciones de Seguridad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}" th:classappend="${!user.activo} ? 'inactive-row' : ''">
+                                <td th:text="${user.u_id}"></td>
+                                <td><strong th:text="${user.uname}"></strong></td>
+                                <td th:text="${user.uemail}"></td>
+                                <td th:text="${user.unumber}"></td>
+                                <td>
+                                    <span th:text="${user.activo} ? 'Activo' : 'Inactivo'"
+                                          th:classappend="${user.activo} ? 'status-active' : 'status-inactive'"></span>
+                                </td>
+                                <td class="actions-cell">
+                                    <a th:href="@{'/updateUser/' + ${user.u_id}}" class="action edit" title="Editar usuario">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+
+                                    <a href="javascript:void(0);"
+                                       th:data-id="${user.u_id}"
+                                       th:data-active="${user.activo}"
+                                       onclick="const id = this.getAttribute('data-id'); const active = this.getAttribute('data-active') === 'true'; customConfirm('¿Deseas ' + (active ? 'inactivar' : 'activar') + ' este usuario?', () => window.location.href = '/toggleUserStatus/' + id);"
+                                       th:text="${user.activo} ? 'Inactivar' : 'Activar'"
+                                       class="action toggle"></a>
+
+                                    <a href="javascript:void(0);"
+                                       th:data-id="${user.u_id}"
+                                       onclick="customConfirm('¿Seguro que deseas eliminar este usuario?', () => window.location.href = '/deleteUser/' + this.getAttribute('data-id'));"
+                                       class="action delete" title="Eliminar usuario">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- PESTAÑA 3: PRODUCTOS -->
+            <section id="tab-products" class="tab-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Catálogo de Productos</h2>
+                        <p class="panel-subtitle">Administración de menú y precios disponibles.</p>
+                    </div>
+                    <a class="btns btn-primary" th:href="@{/addProduct}">
+                        <i class="fa-solid fa-plus"></i> Nuevo Producto
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Id Producto</th>
+                                <th>Nombre Producto</th>
+                                <th>Precio Producto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${products}">
+                                <td th:text="${product.pid}"></td>
+                                <td><strong th:text="${product.pname}"></strong></td>
+                                <td th:text="'$' + ${product.pprice}"></td>
+                                <td class="actions-cell">
+                                    <a th:href="@{'/updateProduct/' + ${product.pid}}" class="action edit" title="Editar">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <a href="javascript:void(0);"
+                                       th:data-id="${product.pid}"
+                                       onclick="customConfirm('¿Deseas eliminar este producto?', () => window.location.href = '/deleteProduct/' + this.getAttribute('data-id'));"
+                                       class="action delete" title="Eliminar">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- PESTAÑA 4: ÓRDENES -->
+            <section id="tab-orders" class="tab-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Historial y Control de Órdenes</h2>
+                        <p class="panel-subtitle">Supervisión de pedidos realizados y estado de procesamiento.</p>
+                    </div>
+                    <button type="button" class="btns btn-secondary" onclick="openSearchModal()">
+                        <i class="fa-solid fa-magnifying-glass"></i> Buscar orden por usuario
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cant.</th>
+                                <th>Total</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${orders}" th:classappend="${!order.activo} ? 'inactive-row' : ''">
+                                <td th:text="${order.user != null ? order.user.uname : 'N/A'}"></td>
+                                <td th:text="${order.user != null ? order.user.uemail : 'N/A'}"></td>
+                                <td><strong th:text="${order.oName}"></strong></td>
+                                <td th:text="'$' + ${order.oPrice}"></td>
+                                <td th:text="${order.oQuantity}"></td>
+                                <td><strong th:text="'$' + ${order.totalAmmout}"></strong></td>
+                                <td th:text="${order.orderDate}"></td>
+                                <td>
+                                    <span th:text="${order.activo} ? 'Activa' : 'Inactiva'"
+                                          th:classappend="${order.activo} ? 'status-active' : 'status-inactive'"></span>
+                                </td>
+                                <td class="actions-cell">
+                                    <a href="javascript:void(0);"
+                                       th:data-id="${order.oId}"
+                                       th:data-active="${order.activo}"
+                                       onclick="const id = this.getAttribute('data-id'); const active = this.getAttribute('data-active') === 'true'; customConfirm('¿Deseas ' + (active ? 'inactivar' : 'activar') + ' esta orden?', () => window.location.href = '/toggleOrderStatus/' + id);"
+                                       th:text="${order.activo} ? 'Inactivar' : 'Activar'"
+                                       class="action toggle"></a>
+
+                                    <a href="javascript:void(0);"
+                                       th:data-id="${order.oId}"
+                                       onclick="customConfirm('¿Seguro que deseas eliminar esta orden?', () => window.location.href = '/deleteOrder/' + this.getAttribute('data-id'));"
+                                       class="action delete" title="Eliminar">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- PESTAÑA 5: AUDITORÍA DE SEGURIDAD (FoodApp_v2) -->
+            <section id="tab-audit" class="tab-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Bitácora de Auditoría y Seguridad (`audit_log`)</h2>
+                        <p class="panel-subtitle">Trazabilidad de operaciones críticas y control de acceso administrativo.</p>
+                    </div>
+                    <span class="audit-status-pill"><i class="fa-solid fa-circle-check"></i> Control de Caché y Sesión Activos</span>
+                </div>
+
+                <div class="security-summary-grid">
+                    <div class="sec-card">
+                        <i class="fa-solid fa-user-lock"></i>
+                        <div>
+                            <h4>Protección Anti-Caché</h4>
+                            <p>Headers <code>no-store, no-cache</code> activos contra retroceso de navegador.</p>
+                        </div>
+                    </div>
+                    <div class="sec-card">
+                        <i class="fa-solid fa-database"></i>
+                        <div>
+                            <h4>Integridad Referencial</h4>
+                            <p>Esquema <code>FoodApp_v2</code> con llaves foráneas explícitas y trazabilidad.</p>
+                        </div>
+                    </div>
+                    <div class="sec-card">
+                        <i class="fa-solid fa-user-check"></i>
+                        <div>
+                            <h4>Cuentas Activas</h4>
+                            <p><strong th:text="${#lists.size(users)}">0</strong> usuarios registrados bajo control de estado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive" th:if="${auditLogs != null and !#lists.isEmpty(auditLogs)}">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Evento</th>
+                                <th>Tabla Afectada</th>
+                                <th>Acción</th>
+                                <th>Registro ID</th>
+                                <th>Usuario Responsable</th>
+                                <th>Fecha / Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="log : ${auditLogs}">
+                                <td th:text="${log.auditId}"></td>
+                                <td><code th:text="${log.tableName}"></code></td>
+                                <td><span class="status-active" th:text="${log.actionType}"></span></td>
+                                <td th:text="${log.recordId}"></td>
+                                <td th:text="${log.performedBy}"></td>
+                                <td th:text="${log.createdAt}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="audit-empty-state" th:if="${auditLogs == null or #lists.isEmpty(auditLogs)}">
+                    <i class="fa-solid fa-shield-cat"></i>
+                    <p>Las políticas de validación de sesión y bloqueo de cuentas están operando correctamente. Los eventos registrados en <code>audit_log</code> se sincronizan con la base de datos <code>FoodApp_v2</code>.</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- MODAL DE BÚSQUEDA DE ÓRDENES -->
+        <div id="searchModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeSearchModal()">&times;</span>
+                <h3><i class="fa-solid fa-magnifying-glass"></i> Buscar órdenes por usuario</h3>
+
+                <form id="searchForm" onsubmit="searchOrdersByUser(event)" class="modal-search-form">
+                    <input type="text" id="usernameInput" placeholder="Ingrese el nombre del usuario..." required>
+                    <button type="submit" class="btns btn-primary">Buscar</button>
+                </form>
+
+                <div id="searchResults" style="display:none; margin-top: 20px;">
+                    <h4>Órdenes encontradas:</h4>
+                    <div class="table-responsive">
+                        <table id="resultsTable">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>Producto</th>
+                                    <th>Precio</th>
+                                    <th>Cantidad</th>
+                                    <th>Total</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE CONFIRMACIÓN PERSONALIZADO -->
+        <div id="customConfirm" class="confirm-modal">
+            <div class="confirm-box">
+                <i class="fa-solid fa-triangle-exclamation confirm-icon"></i>
+                <h3 id="confirmMessage">¿Estás seguro?</h3>
+                <div class="confirm-buttons">
+                    <button id="confirmYes" class="btn-confirm-yes">Sí, continuar</button>
+                    <button id="confirmNo" class="btn-confirm-no">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // === Navegación por Pestañas (Tabs) con persistencia ===
+            function switchTab(tabId, btnElement) {
+                document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+                const targetPanel = document.getElementById(tabId);
+                if (targetPanel)
+                    targetPanel.classList.add('active');
+                if (btnElement)
+                    btnElement.classList.add('active');
+
+                localStorage.setItem('sipago_admin_active_tab', tabId);
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const savedTab = localStorage.getItem('sipago_admin_active_tab');
+                if (savedTab && document.getElementById(savedTab)) {
+                    const btn = document.querySelector(`.tab-btn[data-tab="${savedTab}"]`);
+                    switchTab(savedTab, btn);
+                }
+            });
+
+            // === Modal de confirmación personalizado ===
+            const confirmModal = document.getElementById("customConfirm");
+            const confirmMsg = document.getElementById("confirmMessage");
+            const confirmYes = document.getElementById("confirmYes");
+            const confirmNo = document.getElementById("confirmNo");
+
+            function customConfirm(message, onYes) {
+                confirmMsg.textContent = message;
+                confirmModal.style.display = "flex";
+
+                confirmYes.onclick = () => {
+                    confirmModal.style.display = "none";
+                    if (onYes)
+                        onYes();
+                };
+
+                confirmNo.onclick = () => {
+                    confirmModal.style.display = "none";
+                };
+            }
+
+            // === Filtro de usuarios ===
+            function filtrarUsuarios() {
+                const filtro = document.getElementById("filter").value;
+                const filas = document.querySelectorAll("#usersTable tbody tr");
+
+                filas.forEach(fila => {
+                    const esInactivo = fila.classList.contains("inactive-row");
+                    if (filtro === "todos")
+                        fila.style.display = "";
+                    else if (filtro === "activos" && esInactivo)
+                        fila.style.display = "none";
+                    else if (filtro === "inactivos" && !esInactivo)
+                        fila.style.display = "none";
+                    else
+                        fila.style.display = "";
+                });
+            }
+
+            // === Modal de búsqueda ===
+            function openSearchModal() {
+                document.getElementById("searchModal").style.display = "flex";
+            }
+
+            function closeSearchModal() {
+                document.getElementById("searchModal").style.display = "none";
+                document.getElementById("searchResults").style.display = "none";
+                document.getElementById("resultsBody").innerHTML = "";
+            }
+
+            async function searchOrdersByUser(event) {
+                event.preventDefault();
+                const username = document.getElementById("usernameInput").value.trim();
+                if (!username)
+                    return;
+
+                try {
+                    const response = await fetch(`/searchOrdersByUser?username=${encodeURIComponent(username)}`);
+                    if (!response.ok) {
+                        alert("Error buscando órdenes");
+                        return;
+                    }
+
+                    const data = await response.json();
+                    const tbody = document.getElementById("resultsBody");
+                    tbody.innerHTML = "";
+
+                    if (data.length === 0) {
+                        tbody.innerHTML = "<tr><td colspan='7'>No se encontraron órdenes para este usuario.</td></tr>";
+                    } else {
+                        data.forEach(order => {
+                            const row = `
+                            <tr>
+                                <td>${order.user ? order.user.uname : 'N/A'}</td>
+                                <td>${order.user ? order.user.uemail : 'N/A'}</td>
+                                <td>${order.oName}</td>
+                                <td>$${order.oPrice}</td>
+                                <td>${order.oQuantity}</td>
+                                <td>$${order.totalAmmout}</td>
+                                <td>${order.orderDate}</td>
+                            </tr>`;
+                            tbody.innerHTML += row;
+                        });
+                    }
+
+                    document.getElementById("searchResults").style.display = "block";
+                } catch (e) {
+                    console.error("Error al buscar órdenes:", e);
+                }
+            }
+
+            window.onclick = function (event) {
+                const modal = document.getElementById("searchModal");
+                if (event.target === modal)
+                    closeSearchModal();
+                if (event.target === confirmModal)
+                    confirmModal.style.display = "none";
+            }
+
+            // === Buscar usuarios en tiempo real ===
+            function buscarUsuario() {
+                const input = document.getElementById("userSearchInput").value.toLowerCase();
+                const filas = document.querySelectorAll("#usersTable tbody tr");
+
+                filas.forEach(fila => {
+                    const nombre = fila.children[1].textContent.toLowerCase();
+                    const email = fila.children[2].textContent.toLowerCase();
+
+                    fila.classList.remove("highlight-row");
+
+                    if (input === "") {
+                        fila.style.display = "";
+                    } else if (nombre.includes(input) || email.includes(input)) {
+                        fila.style.display = "";
+                        fila.classList.add("highlight-row");
+                    } else {
+                        fila.style.display = "none";
+                    }
+                });
+            }
+        </script>
+    </body>
 </html>

@@ -1,161 +1,235 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodFrenzy</title> 
-    <link rel="icon" type="image/x-icon" href="./Images/logo.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="" th:href="@{/css/Navigation.css}" />
-    <link rel="stylesheet" href="" th:href="@{css/Products.css}" />
+    <title>Catálogo de Productos - SIPAGO</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Navigation.css}" />
+    <link rel="stylesheet" th:href="@{/css/Products.css}" />
 </head>
 
 <body>
     <nav th:replace="~{Navigation::navbar()}"></nav>
-    <div id="main-container">
-    <div id="biryani"> 
-        <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.5</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
+
+    <main class="catalog-container">
+        <!-- Encabezado y Buscador -->
+        <header class="catalog-header">
+            <div>
+                <span class="catalog-badge"><i class="fa-solid fa-fire-flame-curved"></i> Menú Disponible</span>
+                <h1>Explora Nuestros Productos</h1>
+                <p>Selecciona tu platillo favorito. Inicia sesión para procesar tu orden al instante.</p>
             </div>
-            <img src="./Images/biryani/Pollo_Campero.jpeg" alt="Pollo Campero">
-            <p class="item-name">Pollo Campero</p>
-            <p class="item-price">Precio: $4.10</p>
-            <a href="/login" id="buy">Buy Now</a>
+
+            <div class="catalog-search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="productSearch" placeholder="Buscar platillo por nombre..." onkeyup="filtrarProductos()">
+            </div>
+        </header>
+
+        <!-- Pestañas de Categorías (Cumple observación de navegación por pestañas) -->
+        <div class="category-tabs" role="tablist">
+            <button type="button" class="cat-tab active" onclick="filtrarCategoria('todos', this)">
+                <i class="fa-solid fa-border-all"></i> Todos
+            </button>
+            <button type="button" class="cat-tab" onclick="filtrarCategoria('pollo', this)">
+                <i class="fa-solid fa-drumstick-bite"></i> Pollo & Carnes
+            </button>
+            <button type="button" class="cat-tab" onclick="filtrarCategoria('especialidades', this)">
+                <i class="fa-solid fa-bowl-food"></i> Especialidades
+            </button>
+            <button type="button" class="cat-tab" onclick="filtrarCategoria('sistema', this)"
+                    th:if="${products != null and !#lists.isEmpty(products)}">
+                <i class="fa-solid fa-database"></i> Nuevos en Menú (<span th:text="${#lists.size(products)}">0</span>)
+            </button>
         </div>
- 
- <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.5</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
+
+        <!-- Grid de Productos -->
+        <section id="productsGrid" class="products-grid">
+            <!-- Productos dinámicos registrados en MySQL por el Administrador -->
+            <article class="item-card" data-category="sistema" th:each="prod : ${products}">
+                <div class="card-top">
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> 5.0</span>
+                    <button type="button" class="fav-btn" onclick="toggleFav(this)" aria-label="Favorito">
+                        <i class="fa-regular fa-heart"></i>
+                    </button>
+                </div>
+                <img th:src="@{/Images/biryani/Pollo_Campero.jpeg}" alt="Producto">
+                <span class="cat-tag">Menú Oficial</span>
+                <h3 class="item-name" th:text="${prod.pname}">Nombre Producto</h3>
+                <p class="item-price" th:text="'$' + ${prod.pprice}">$0.00</p>
+                <a th:href="@{/login}" class="buy-btn" onclick="solicitarLogin(event, this)">
+                    <i class="fa-solid fa-cart-plus"></i> Ordenar Ahora
+                </a>
+            </article>
+
+            <!-- Catálogo Base Visual -->
+            <article class="item-card" data-category="pollo">
+                <div class="card-top">
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> 5.0</span>
+                    <button type="button" class="fav-btn" onclick="toggleFav(this)"><i class="fa-regular fa-heart"></i></button>
+                </div>
+                <img th:src="@{/Images/biryani/Pollo_Campero.jpeg}" alt="Pollo Campero">
+                <span class="cat-tag">Pollo</span>
+                <h3 class="item-name">Pollo Campero</h3>
+                <p class="item-price">$4.10</p>
+                <a th:href="@{/login}" class="buy-btn" onclick="solicitarLogin(event, this)"><i class="fa-solid fa-cart-plus"></i> Ordenar Ahora</a>
+            </article>
+
+            <article class="item-card" data-category="especialidades">
+                <div class="card-top">
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> 4.8</span>
+                    <button type="button" class="fav-btn" onclick="toggleFav(this)"><i class="fa-regular fa-heart"></i></button>
+                </div>
+                <img th:src="@{/Images/paneer/paneer-butter-masala.jpg}" alt="Paneer Butter Masala">
+                <span class="cat-tag">Especialidad</span>
+                <h3 class="item-name">Paneer Butter Masala</h3>
+                <p class="item-price">$2.90</p>
+                <a th:href="@{/login}" class="buy-btn" onclick="solicitarLogin(event, this)"><i class="fa-solid fa-cart-plus"></i> Ordenar Ahora</a>
+            </article>
+
+            <article class="item-card" data-category="pollo">
+                <div class="card-top">
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> 4.5</span>
+                    <button type="button" class="fav-btn" onclick="toggleFav(this)"><i class="fa-regular fa-heart"></i></button>
+                </div>
+                <img th:src="@{/Images/chicken/Afgani-chicken-curry.jpg}" alt="Afgani Chicken Curry">
+                <span class="cat-tag">Pollo</span>
+                <h3 class="item-name">Afgani Chicken Curry</h3>
+                <p class="item-price">$4.10</p>
+                <a th:href="@{/login}" class="buy-btn" onclick="solicitarLogin(event, this)"><i class="fa-solid fa-cart-plus"></i> Ordenar Ahora</a>
+            </article>
+
+            <article class="item-card" data-category="pollo">
+                <div class="card-top">
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> 5.0</span>
+                    <button type="button" class="fav-btn" onclick="toggleFav(this)"><i class="fa-regular fa-heart"></i></button>
+                </div>
+                <img th:src="@{/Images/chicken/butter-chicken.jpg}" alt="Butter Chicken">
+                <span class="cat-tag">Pollo</span>
+                <h3 class="item-name">Butter Chicken</h3>
+                <p class="item-price">$3.80</p>
+                <a th:href="@{/login}" class="buy-btn" onclick="solicitarLogin(event, this)"><i class="fa-solid fa-cart-plus"></i> Ordenar Ahora</a>
+            </article>
+
+            <article class="item-card" data-category="especialidades">
+                <div class="card-top">
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> 4.5</span>
+                    <button type="button" class="fav-btn" onclick="toggleFav(this)"><i class="fa-regular fa-heart"></i></button>
+                </div>
+                <img th:src="@{/Images/north-india-food/Laccha-Paratha.jpg}" alt="Laccha Paratha">
+                <span class="cat-tag">Especialidad</span>
+                <h3 class="item-name">Laccha Paratha</h3>
+                <p class="item-price">$3.00</p>
+                <a th:href="@{/login}" class="buy-btn" onclick="solicitarLogin(event, this)"><i class="fa-solid fa-cart-plus"></i> Ordenar Ahora</a>
+            </article>
+
+            <article class="item-card" data-category="pollo">
+                <div class="card-top">
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> 5.0</span>
+                    <button type="button" class="fav-btn" onclick="toggleFav(this)"><i class="fa-regular fa-heart"></i></button>
+                </div>
+                <img th:src="@{/Images/chicken/Matka-Chicken.jpg}" alt="Matka Chicken">
+                <span class="cat-tag">Pollo</span>
+                <h3 class="item-name">Matka Chicken</h3>
+                <p class="item-price">$5.10</p>
+                <a th:href="@{/login}" class="buy-btn" onclick="solicitarLogin(event, this)"><i class="fa-solid fa-cart-plus"></i> Ordenar Ahora</a>
+            </article>
+
+            <article class="item-card" data-category="pollo">
+                <div class="card-top">
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> 4.2</span>
+                    <button type="button" class="fav-btn" onclick="toggleFav(this)"><i class="fa-regular fa-heart"></i></button>
+                </div>
+                <img th:src="@{/Images/chicken/Tandoori-chicken-tikka.jpg}" alt="Chicken Tikka">
+                <span class="cat-tag">Pollo</span>
+                <h3 class="item-name">Chicken Tikka</h3>
+                <p class="item-price">$3.10</p>
+                <a th:href="@{/login}" class="buy-btn" onclick="solicitarLogin(event, this)"><i class="fa-solid fa-cart-plus"></i> Ordenar Ahora</a>
+            </article>
+
+            <article class="item-card" data-category="especialidades">
+                <div class="card-top">
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> 4.5</span>
+                    <button type="button" class="fav-btn" onclick="toggleFav(this)"><i class="fa-regular fa-heart"></i></button>
+                </div>
+                <img th:src="@{/Images/north-india-food/Honey-Chilli-Potato.jpg}" alt="Chilli Potato">
+                <span class="cat-tag">Especialidad</span>
+                <h3 class="item-name">Chilli Potato</h3>
+                <p class="item-price">$1.50</p>
+                <a th:href="@{/login}" class="buy-btn" onclick="solicitarLogin(event, this)"><i class="fa-solid fa-cart-plus"></i> Ordenar Ahora</a>
+            </article>
+        </section>
+    </main>
+
+    <!-- Modal de aviso para iniciar sesión -->
+    <div id="loginPromptModal" class="prompt-modal">
+        <div class="prompt-box">
+            <i class="fa-solid fa-user-lock prompt-icon"></i>
+            <h3>Inicia sesión para ordenar</h3>
+            <p id="promptProductText">Debes ingresar con tu cuenta de usuario para agregar productos a tu orden.</p>
+            <div class="prompt-actions">
+                <a th:href="@{/login}" class="btn-go-login">Ir a Iniciar Sesión</a>
+                <button type="button" class="btn-cancel-login" onclick="cerrarPrompt()">Seguir explorando</button>
             </div>
-            <img src="./Images//paneer/paneer-butter-masala.jpg" alt="Chicken Biryani">
-            <p class="item-name">Producto 1 </p>
-            <p class="item-price">Price: $ 2.90</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div> 
-         
-         <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.4.5</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/chicken/Afgani-chicken-curry.jpg" alt="Chicken Biryani">
-            <p class="item-name">Chicken</p>
-            <p class="item-price">Price: $ 4.10</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div> 
-        
-        <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.5</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/chicken/butter-chicken.jpg" alt="Chicken Biryani">
-            <p class="item-name">Butter Chicken</p>
-            <p class="item-price">Price: $ 3.80</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div> 
-        
-        <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.4.5</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/north-india-food/Laccha-Paratha.jpg" alt="Chicken Biryani">
-            <p class="item-name">Laccha Paratha</p>
-            <p class="item-price">Price: $3.00</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div> 
-        
-        <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.5</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/chicken/Matka-Chicken.jpg" alt="Chicken Biryani">
-            <p class="item-name">Matka-Chicken</p>
-            <p class="item-price">Price: $ 5.10</p>
-            <a href="/login" id="buy">Buy Now</a>
         </div>
-      
-      <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.4</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/chicken/Tandoori-chicken-tikka.jpg" alt="Chicken Biryani">
-            <p class="item-name">Chicken Tikka</p>
-            <p class="item-price">Price: $ 3.10</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div> 
-        
-        <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.4.5</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/north-india-food/Honey-Chilli-Potato.jpg" alt="Chicken Biryani">
-            <p class="item-name">Chilli Potato</p>
-            <p class="item-price">Price: $ 1.50</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div>   
-         
-         <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.4.5</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/north-india-food/chola-bhatura.jpg" alt="Chicken Biryani">
-            <p class="item-name">Chola Bhatura</p>
-            <p class="item-price">Price: $ 1.80</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div>   
-         
-         <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.4.0</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/north-india-food/Gulab Jamun.jpg" alt="Chicken Biryani">
-            <p class="item-name">Gulab Jamun</p>
-            <p class="item-price">Price: $ 5.00</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div>   
-        
-        <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.4.5</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/chinese/chowmein.jpg" alt="Chicken Biryani">
-            <p class="item-name">Chowmein</p>
-            <p class="item-price">Price: $ 1.50</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div>   
-        
-        <div class="item-card">
-            <div class="card-top">
-                <i class="fa fa-star" id="rating">$.5.0</i>
-                <i class="fa fa-heart-o add-to-cart" aria-label="Add to favorites"></i>
-            </div>
-            <img src="./Images/paneer/paneer-do-pyaza.jpg" alt="Chicken Biryani">
-            <p class="item-name">Paneer Do Pyaza</p>
-            <p class="item-price">Price: $ 2.70</p>
-            <a href="/login" id="buy">Buy Now</a>
-        </div>  
-         
     </div>
-    </div>
+
     <script>
-        document.getElementById("buy").addEventListener("click", function (event) {
+        let categoriaActual = 'todos';
+
+        function filtrarCategoria(categoria, btn) {
+            categoriaActual = categoria;
+            document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            aplicarFiltros();
+        }
+
+        function filtrarProductos() {
+            aplicarFiltros();
+        }
+
+        function aplicarFiltros() {
+            const texto = document.getElementById('productSearch').value.toLowerCase().trim();
+            const tarjetas = document.querySelectorAll('.item-card');
+
+            tarjetas.forEach(card => {
+                const nombre = card.querySelector('.item-name').textContent.toLowerCase();
+                const cat = card.getAttribute('data-category');
+                const coincideCategoria = (categoriaActual === 'todos' || cat === categoriaActual);
+                const coincideTexto = nombre.includes(texto);
+
+                card.style.display = (coincideCategoria && coincideTexto) ? 'flex' : 'none';
+            });
+        }
+
+        function toggleFav(btn) {
+            const icon = btn.querySelector('i');
+            icon.classList.toggle('fa-regular');
+            icon.classList.toggle('fa-solid');
+            btn.classList.toggle('is-fav');
+        }
+
+        function solicitarLogin(event, enlace) {
             event.preventDefault();
-            alert("Please Login as a User to buy Products");
-        });
+            const nombreProd = enlace.closest('.item-card').querySelector('.item-name').textContent;
+            document.getElementById('promptProductText').textContent =
+                `Inicia sesión como usuario para ordenar "${nombreProd}" y procesar tu pedido.`;
+            document.getElementById('loginPromptModal').style.display = 'flex';
+        }
+
+        function cerrarPrompt() {
+            document.getElementById('loginPromptModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginPromptModal');
+            if (event.target === modal) cerrarPrompt();
+        };
     </script>
 </body>
-
 </html>
 

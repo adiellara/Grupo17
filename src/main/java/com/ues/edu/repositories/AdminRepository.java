@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface AdminRepository extends CrudRepository<Admin, Integer>
 {
 	public Admin findByAdminEmail(String email);
+        Admin findByAdminEmailAndAdminPassword(String email, String password);
 }

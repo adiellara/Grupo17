@@ -1,47 +1,172 @@
-<!doctype html>
-<html lang="en" xmnls:th="http://www.thymeleaf.org">
 
-<head>
-	<meta charset="UTF-8" />
-	<title>Document</title>
-</head>
-<style>
-	body{
-		background-color:navajowhite;
-		font-family: cursive;
-		font-size: 30px;
-		
-	}
-	.text{
-		position: relative;
-		left: 250px;
-		top: 200px;
-		text-align: center;
-		height: max-content;
-		width: max-content;
-	}
-	span,h4
-	{
-		color: green;
-	}
-	a{
-		border: 1px solid black;
-		text-decoration: none;
-		background-color: darkgreen;
-		color: aliceblue;
-		font-family: sans-serif;
-		padding: 5px;
-	}
-	
-</style>
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Orden Registrada - SIPAGO</title>
+        <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<body>
-		<a href="/product/back" >Back</a>
-	<div class="text">
-		<h4>Orden Ingresada... !!!</h4>
-		<h3 style="font-family: sans-serif;">Total a Pagar : <span th:text="'$ '+${amount}+'/-'"></span></h3>
-	</div>
+        <style>
+            body {
+                background-color: #12151c;
+                color: #f3f4f6;
+                font-family: 'Poppins', 'Segoe UI', sans-serif;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
 
-</body>
+            .success-card {
+                background-color: #181c26;
+                border: 1px solid rgba(255, 209, 102, 0.3);
+                border-radius: 18px;
+                padding: 38px 34px;
+                max-width: 480px;
+                width: 100%;
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+                text-align: center;
+            }
 
+            .check-circle {
+                width: 74px;
+                height: 74px;
+                margin: 0 auto 18px;
+                border-radius: 50%;
+                background: rgba(16, 185, 129, 0.15);
+                border: 2px solid #10b981;
+                color: #10b981;
+                font-size: 2.3rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+            }
+
+            .summary-box {
+                background-color: #12151c;
+                border: 1px dashed rgba(255, 209, 102, 0.45);
+                border-radius: 12px;
+                padding: 16px 18px;
+                margin: 20px 0;
+                text-align: left;
+            }
+
+            .summary-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 6px 0;
+                font-size: 0.92rem;
+                color: #cbd5e1;
+            }
+
+            .summary-row.total-row {
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                margin-top: 8px;
+                padding-top: 12px;
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #ffffff;
+            }
+
+            .text-gold {
+                color: #ffd166;
+            }
+
+            .progress-redirect {
+                height: 5px;
+                background-color: #262b38;
+                border-radius: 5px;
+                overflow: hidden;
+                margin: 14px 0 22px;
+            }
+
+            .progress-bar-fill {
+                height: 100%;
+                width: 100%;
+                background-color: #ffd166;
+                animation: shrinkBar 5s linear forwards;
+            }
+
+            @keyframes shrinkBar {
+                from {
+                    width: 100%;
+                }
+                to {
+                    width: 0%;
+                }
+            }
+
+            .btn-gold {
+                background-color: #ffd166;
+                color: #111827;
+                border: none;
+                font-weight: 600;
+            }
+
+            .btn-gold:hover {
+                background-color: #ffc233;
+                color: #111827;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="success-card">
+            <div class="check-circle">
+                <i class="fa-solid fa-check"></i>
+            </div>
+
+            <h2 class="fw-bold text-white mb-2">¡Orden Registrada!</h2>
+            <p class="text-secondary small mb-0"
+               th:text="${success != null ? success : (message != null ? message : 'Tu pedido ha sido ingresado al sistema correctamente.')}">
+                Tu pedido ha sido ingresado al sistema correctamente.
+            </p>
+
+            <!-- Resumen de la orden -->
+            <div class="summary-box">
+                <div class="summary-row" th:if="${productName != null}">
+                    <span><i class="fa-solid fa-utensils text-gold me-2"></i>Platillo:</span>
+                    <strong class="text-white" th:text="${productName}">Producto</strong>
+                </div>
+                <div class="summary-row" th:if="${quantity != null}">
+                    <span><i class="fa-solid fa-layer-group text-gold me-2"></i>Cantidad:</span>
+                    <strong class="text-white" th:text="${quantity} + ' ud(s).'">1 ud(s).</strong>
+                </div>
+                <div class="summary-row total-row">
+                    <span>Total a Pagar:</span>
+                    <span class="text-gold fs-4" th:text="'$' + ${amount != null ? amount : '0.00'}">$0.00</span>
+                </div>
+            </div>
+
+            <p class="small text-secondary mb-1">
+                <i class="fa-solid fa-spinner fa-spin me-1 text-gold"></i>
+                Redirigiendo a la pasarela de pago en <strong>5 segundos</strong>...
+            </p>
+            <div class="progress-redirect">
+                <div class="progress-bar-fill"></div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <a th:href="@{/pago}" class="btn btn-gold py-2">
+                    <i class="fa-brands fa-cc-visa me-2"></i> Continuar a Pago con Tarjeta
+                </a>
+                <a th:href="@{/product/back}" class="btn btn-outline-secondary btn-sm py-2 text-light">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Volver a Mis Órdenes
+                </a>
+            </div>
+        </div>
+
+        <script>
+            setTimeout(function () {
+                window.location.href = '/pago';
+            }, 5000);
+        </script>
+    </body>
 </html>

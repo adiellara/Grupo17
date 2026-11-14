@@ -23,7 +23,6 @@ public class UserLogin {
 
     @Override
     public String toString() {
-        return "UserLogin [userEmail=" + userEmail + ", userPassword=" + userPassword + "]";
+        return "UserLogin [userEmail=" + userEmail + "]";
     }
-
 }

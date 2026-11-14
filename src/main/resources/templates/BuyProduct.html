@@ -1,138 +1,236 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.com">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Pedidos - SIPAGO</title>
 
-    <head>
-        <meta charset="UTF-8" />
-        <title>Buy Product </title>
-        <link rel="stylesheet" href="" />
-    </head>
-    <style>
-        body {
-            /*background-image: url("https://images.pexels.com/photos/7219747/pexels-photo-7219747.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");*/
-            background-color: #92a8d1;
-            background-size: cover;
-        }
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
 
-        * {
-            font-size: 16px;
-            font-family: sans-serif;
-        }
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        .searchInput {
-            margin-top: 30px;
-        }
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        .searchInput input {
-            padding: 15px;
-            width: 270px;
-        }
+    <!-- CSS propio -->
+    <link rel="stylesheet" th:href="@{/css/BuyProduct.css}">
+</head>
 
-        .searchInput button {
-            padding: 15px;
-            width: 100px;
-            background-color: red;
-        }
+<body>
+    <!-- Barra superior -->
+    <nav class="navbar navbar-expand-lg sipago-user-nav px-4 py-3">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/home}">
+                <img th:src="@{/Images/logo.png}" onerror="this.src='/images/logo.png'" alt="Logo" class="nav-logo">
+                <span class="fw-bold text-gold">SIPAGO</span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle ms-2 d-none d-sm-inline">
+                    <i class="fa-solid fa-shield-check"></i> Sesión Activa
+                </span>
+            </a>
 
-        .details {
-            margin-top: 70px;
-        }
-
-        .details input,
-        .details button {
-            display: block;
-            padding: 5px;
-            font-size: 16px;
-
-
-        }
-
-        a {
-            border: 1px solid black;
-            background-color: darkgoldenrod;
-            color: black;
-            text-decoration: none;
-            padding: 7px;
-            width: 50px;
-            position: fixed;
-        }
-        .details th{
-            background-color: dimgray;
-            font-family: sans-serif;
-            padding: 10px;
-            border: none;
-
-        }
-        td{
-            text-align: center;
-            border-bottom: 1px solid lightslategrey;
-        }
-        .welcome marquee,.welcome span
-        {
-
-            width: 50%;
-            font-size: 20px;
-            font-family: sans-serif;
-            color: lavender;
-        }
-
-    </style>
-
-    <body>
-        <div class="welcome">
-            <marquee direction="right"  behaviour="slide" 
-                     scrollamount="15" loop="1">Welcome Back <span  th:text="${name}"></span>
-            </marquee><br />
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <span class="user-greeting">
+                    <i class="fa-solid fa-circle-user text-gold me-1"></i>
+                    Hola, <strong th:text="${name}">Usuario</strong>
+                </span>
+                <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm fw-semibold">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i> Cerrar sesión
+                </a>
+            </div>
         </div>
+    </nav>
 
-        <a href="/login">Back</a>
-    <center>
+    <main class="container my-4">
+        <!-- Menú de Pestañas (Cumple observación de navegación por pestañas) -->
+        <ul class="nav nav-pills sipago-tabs mb-4 justify-content-center" id="userPortalTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="new-order-tab" data-bs-toggle="pill" data-bs-target="#new-order-pane"
+                        type="button" role="tab" aria-controls="new-order-pane" aria-selected="true">
+                    <i class="fa-solid fa-cart-plus me-2"></i> Ingresar Nueva Orden
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="my-orders-tab" data-bs-toggle="pill" data-bs-target="#my-orders-pane"
+                        type="button" role="tab" aria-controls="my-orders-pane" aria-selected="false">
+                    <i class="fa-solid fa-receipt me-2"></i> Mis Órdenes y Seguimiento
+                    <span class="badge rounded-pill bg-dark text-gold ms-1"
+                          th:if="${orders != null}" th:text="${#lists.size(orders)}">0</span>
+                </button>
+            </li>
+        </ul>
 
-        <form action="" th:action="@{/product/search}" method="post" class="searchInput">
-            <h1>Product Search :</h1>
-            <input type="text" name="productName" required placeholder="Please enter the Product Name....">
-            <button type="submit">SEARCH</button><br />
-            <smal style="color: red;" th:text="${message}"> </smal>
-        </form>
+        <!-- Contenido de Pestañas -->
+        <div class="tab-content" id="userPortalTabsContent">
 
-        <div th:if="${product!=null}" class="details">
-            <form action="" th:action="@{/product/order}" th:object="${product}" method="post">
-                ProductName :
-                <input type="text" value="" name="oName" th:value="${product.pname}" readonly /><br />
-                Product Price :
-                <input type="text" value="" name="oPrice" th:value="${product.pprice}" readonly /><br />
-                Quqntity :
-                <input type="number" placeholder="Minimun: 1KG" min="1" name="oQuantity" /><br />
-          
-            </form>
-            <form action="" th:action="@{/payment}" th:object="${creditcard}" method="get">
-                      <button type="submit">Ingresar Orden</button>
-                <!--   <button type="submit">Ingresar Pago</button>-->
+            <!-- PESTAÑA 1: BUSCADOR Y CREACIÓN DE ORDEN -->
+            <div class="tab-pane fade show active" id="new-order-pane" role="tabpanel" aria-labelledby="new-order-tab">
+                <div class="row justify-content-center g-4">
+                    <!-- Buscador de productos -->
+                    <div class="col-lg-8">
+                        <div class="sipago-card p-4">
+                            <div class="text-center mb-3">
+                                <span class="step-badge">Paso 1</span>
+                                <h3 class="card-title-gold mt-2">
+                                    <i class="fa-solid fa-magnifying-glass me-2"></i>Buscar Producto en Menú
+                                </h3>
+                                <p class="text-muted-light small">Escribe el nombre del platillo que deseas ordenar</p>
+                            </div>
 
-            </form>
+                            <form th:action="@{/product/search}" method="post" class="mx-auto" style="max-width: 520px;">
+                                <div class="input-group">
+                                    <input type="text" name="productName" class="form-control sipago-input"
+                                           placeholder="Ej. Pollo Campero, Butter Chicken..." required>
+                                    <button class="btn btn-gold fw-semibold px-4" type="submit">
+                                        <i class="fa-solid fa-search me-1"></i> Buscar
+                                    </button>
+                                </div>
+                                <div th:if="${message != null}" class="alert alert-danger py-2 px-3 mt-3 mb-0 small text-center">
+                                    <i class="fa-solid fa-circle-exclamation me-1"></i>
+                                    <span th:text="${message}"></span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Formulario de Confirmación de Orden (Visible al encontrar producto) -->
+                    <div class="col-lg-6" th:if="${product != null}">
+                        <div class="sipago-card border-gold p-4">
+                            <div class="text-center mb-4">
+                                <span class="step-badge bg-success text-white">Paso 2</span>
+                                <h3 class="text-success fw-bold mt-2">
+                                    <i class="fa-solid fa-file-invoice-dollar me-2"></i>Detalle de la Orden
+                                </h3>
+                            </div>
+
+                            <form th:action="@{'/order/create/' + ${product.pid}}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label text-light">Nombre del Producto</label>
+                                    <input type="text" name="oName" th:value="${product.pname}"
+                                           class="form-control sipago-input-readonly" readonly>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label text-light">Precio Unitario ($)</label>
+                                        <input type="text" id="unitPrice" name="oPrice" th:value="${product.pprice}"
+                                               class="form-control sipago-input-readonly" readonly>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label text-light">Cantidad</label>
+                                        <input type="number" id="orderQty" name="quantity" min="1" value="1"
+                                               class="form-control sipago-input" oninput="calcularTotal()" required>
+                                    </div>
+                                </div>
+
+                                <!-- Cálculo dinámico del total -->
+                                <div class="total-preview-box mb-4">
+                                    <span>Total Estimado a Pagar:</span>
+                                    <strong id="totalEstimate" class="fs-4 text-gold"
+                                            th:text="'$' + ${product.pprice}">$0.00</strong>
+                                </div>
+
+                                <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
+                                    <i class="fa-solid fa-cart-shopping me-2"></i> Confirmar e Ingresar Orden
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 2: HISTORIAL DE ÓRDENES Y SEGUIMIENTO -->
+            <div class="tab-pane fade" id="my-orders-pane" role="tabpanel" aria-labelledby="my-orders-tab">
+                <div class="sipago-card p-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 pb-2 border-bottom border-secondary">
+                        <div>
+                            <h3 class="card-title-gold mb-1">
+                                <i class="fa-solid fa-list-check me-2"></i>Historial de Mis Órdenes
+                            </h3>
+                            <p class="text-muted-light small mb-0">Consulta el detalle y estado de tus pedidos registrados</p>
+                        </div>
+                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="irANuevaOrden()">
+                            <i class="fa-solid fa-plus me-1"></i> Hacer otro pedido
+                        </button>
+                    </div>
+
+                    <div th:if="${orders != null and !#lists.isEmpty(orders)}" class="table-responsive">
+                        <table class="table table-dark table-hover text-center align-middle sipago-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Precio Unit.</th>
+                                    <th>Cantidad</th>
+                                    <th>Total Pagado</th>
+                                    <th>Fecha y Hora</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="order : ${orders}">
+                                    <td class="fw-semibold text-white" th:text="${order.oName}"></td>
+                                    <td th:text="'$' + ${order.oPrice}"></td>
+                                    <td><span class="badge bg-secondary" th:text="${order.oQuantity}"></span></td>
+                                    <td class="fw-bold text-success" th:text="'$' + ${order.totalAmmout}"></td>
+                                    <td class="small text-muted-light" th:text="${order.orderDate}"></td>
+                                    <td>
+                                        <span th:if="${order.activo}" class="badge bg-success-subtle text-success border border-success">
+                                            <i class="fa-solid fa-circle-check me-1"></i> Procesada
+                                        </span>
+                                        <span th:unless="${order.activo}" class="badge bg-warning-subtle text-warning border border-warning">
+                                            <i class="fa-solid fa-clock me-1"></i> En Revisión
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div th:if="${orders == null or #lists.isEmpty(orders)}" class="text-center py-5 text-muted-light">
+                        <i class="fa-solid fa-basket-shopping fa-3x mb-3 text-secondary"></i>
+                        <p class="mb-3">Aún no tienes órdenes registradas en tu historial.</p>
+                        <button type="button" class="btn btn-gold fw-semibold" onclick="irANuevaOrden()">
+                            Buscar mi primer platillo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
+    </main>
 
-        <div th:if="${orders!=null}" class="details">
-            <h2>Your Orders :</h2>
-            <table >
-                <tr>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-                    <th>Product_Name</th>
-                    <th>Product_Price</th>
-                    <th>Product_Quantity</th>
-                    <th>Total_Ammount</th>
-                    <th>Date</th>
-                </tr>
-                <tr th:each="order :${orders}">
-                    <td th:text="${order.oName}"></td>
-                    <td th:text="${order.oPrice}"></td>
-                    <td th:text="${order.oQuantity}"></td>
-                    <td th:text="${order.totalAmmout}"></td>
-                    <td th:text="${order.orderDate}"></td>
+    <script>
+        function calcularTotal() {
+            const price = parseFloat(document.getElementById('unitPrice')?.value) || 0;
+            const qty = parseInt(document.getElementById('orderQty')?.value) || 1;
+            const total = (price * Math.max(1, qty)).toFixed(2);
+            const display = document.getElementById('totalEstimate');
+            if (display) display.textContent = '$' + total;
+        }
 
-                </tr>
-            </table>
-        </div>
-    </center>
+        function irANuevaOrden() {
+            const tabTrigger = document.getElementById('new-order-tab');
+            if (tabTrigger) bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+        }
+
+        // Si el usuario acaba de crear una orden (no hay producto seleccionado pero sí historial),
+        // o si hay un parámetro ?tab=orders, mostrar la pestaña de historial automáticamente.
+        document.addEventListener('DOMContentLoaded', () => {
+            calcularTotal();
+            const hasSelectedProduct = document.getElementById('unitPrice') !== null;
+            const hasMessage = document.querySelector('.alert-danger') !== null;
+            const hasOrders = document.querySelectorAll('#my-orders-pane tbody tr').length > 0;
+
+            if (!hasSelectedProduct && !hasMessage && hasOrders) {
+                const ordersTab = document.getElementById('my-orders-tab');
+                if (ordersTab) bootstrap.Tab.getOrCreateInstance(ordersTab).show();
+            }
+        });
+    </script>
 </body>
-
 </html>

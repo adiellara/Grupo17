@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 public interface OrderRepository extends JpaRepository<Orders, Integer>
 {
 	List<Orders> findOrdersByUser(User user);
+         List<Orders> findByUser_UnameContainingIgnoreCase(String uname);
 }

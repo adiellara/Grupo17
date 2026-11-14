@@ -1,80 +1,119 @@
 <!doctype html>
-<html lang="en">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="UTF-8" />
-	<title>FoodApp</title>
-	<link rel="icon" type="image/x-icon" href="./img/b.png">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-	<link rel="stylesheet" href="" th:href="@{/css/Navigation.css}" />
-	<link rel="stylesheet" href="" th:href="@{/css/Locate_us.css}" />
-	<style>
-		.icons{
-			align-items: center;
-		}
-	</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ubicación y Horarios - SIPAGO | FoodApp</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Navigation.css}" />
+    <link rel="stylesheet" th:href="@{/css/Locate_us.css}" />
 </head>
 
 <body>
-	<nav th:replace="~{Navigation::navbar()}"></nav>
-	<center>
-		<h1 style="color: orangered; ">Puedes Visitarnos:</h1>
-		<small style="color: red;font-weight: bold;">Internet required..</small>
-	</center>
-	<div class="location">
-<section class="location">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.0405800561925!2d-89.20581002639649!3d13.715992098124556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f6330843530ff0b%3A0xd2e3ab336929e47f!2sUniversidad%20de%20El%20Salvador!5e0!3m2!1ses!2ssv!4v1759793883603!5m2!1ses!2ssv" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </section>
+    <nav th:replace="~{Navigation::navbar()}"></nav>
 
-    </section>
+    <main class="locate-container">
+        <!-- Encabezado -->
+        <header class="locate-header">
+            <span class="locate-badge"><i class="fa-solid fa-map-location-dot"></i> Encuéntranos</span>
+            <h1>Nuestra Ubicación</h1>
+            <p>Visítanos en nuestra sede principal o realiza tu pedido en línea para entrega rápida.</p>
+        </header>
 
-    <section class="contact-us">
-        <div class="row">
-            <div class="contact-col">
-                <div>
-                    <i class="contact-icon fas fa-home"></i>
-                    <span>
-                        <h5>Final, 25 Av. Norte, San Salvador</h5>
-                        <p>San Salvador, El Salvador</p>
-                    </span>
+        <!-- Contenedor del Mapa Interactivo -->
+        <section class="map-card">
+            <div class="map-top-bar">
+                <div class="map-title">
+                    <i class="fa-solid fa-location-crosshairs text-gold"></i>
+                    <span>Sede Central — Universidad de El Salvador, San Salvador</span>
+                </div>
+                <a href="https://maps.google.com/?q=13.715992,-89.205810" target="_blank" rel="noopener" class="btn-open-maps">
+                    <i class="fa-solid fa-up-right-from-square"></i> Abrir en Google Maps
+                </a>
+            </div>
+
+            <div class="map-frame-wrapper">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.0405800561925!2d-89.20581002639649!3d13.715992098124556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f6330843530ff0b%3A0xd2e3ab336929e47f!2sUniversidad%20de%20El%20Salvador!5e0!3m2!1ses!2ssv!4v1759793883603!5m2!1ses!2ssv"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    title="Mapa de ubicación SIPAGO FoodApp">
+                </iframe>
+            </div>
+        </section>
+
+        <!-- Información de Sede y Formulario Rápido -->
+        <section class="locate-grid">
+            <!-- Columna Izquierda: Datos y Horarios -->
+            <div class="info-column">
+                <div class="detail-card">
+                    <div class="detail-icon"><i class="fa-solid fa-building"></i></div>
+                    <div>
+                        <h3>Dirección Principal</h3>
+                        <p>Final 25 Av. Norte, Ciudad Universitaria,<br>San Salvador, El Salvador</p>
+                    </div>
                 </div>
 
-                <div>
-                    <i class="contact-icon fas fa-phone"></i>
-                    <span>
-                        <h5>+123456789</h5>
-                        <p>Lunes a Viernes, 10AM to 8PM</p>
-                    </span>
+                <div class="detail-card">
+                    <div class="detail-icon"><i class="fa-solid fa-clock"></i></div>
+                    <div>
+                        <h3>Horarios de Atención</h3>
+                        <p>Lunes a Viernes: 10:00 AM – 8:00 PM<br>Sábados: 11:00 AM – 6:00 PM</p>
+                    </div>
                 </div>
 
-                <div>
-                    <i class="contact-icon fas fa-envelope"></i>
-                    <span>
-                        <h5>dg12003@ues.edu.sv</h5>
-                        <p>Envianos un Email</p>
-                    </span>
+                <div class="detail-card">
+                    <div class="detail-icon"><i class="fa-solid fa-headset"></i></div>
+                    <div>
+                        <h3>Teléfono y Soporte</h3>
+                        <p>+503 2225-1500<br>dg12003@ues.edu.sv</p>
+                    </div>
                 </div>
             </div>
-            <div class="contact-col">
-                <form action="" method="post" enctype="text/plain">
-                    <input type="text" name="name" placeholder="Enter your name" required>
-                    <input type="email" name="email" placeholder="Enter email address" required>
-                    <input type="text" name="subject" placeholder="Enter subject" required>
-                    <textarea rows="8" name="message" placeholder="Message" required></textarea>
-                    <button type="submit" class="visit-btn red-btn">Send</button>
+
+            <!-- Columna Derecha: Formulario de Consulta -->
+            <div class="form-column">
+                <h2><i class="fa-solid fa-envelope-open-text text-gold"></i> Consulta sobre Cobertura</h2>
+                <p class="form-sub">¿Deseas confirmar si llegamos a tu zona o reservar un pedido grupal? Escríbenos.</p>
+
+                <form id="locateForm" onsubmit="enviarConsultaUbicacion(event)">
+                    <div class="input-row">
+                        <input type="text" name="name" placeholder="Tu nombre completo" required>
+                        <input type="email" name="email" placeholder="Tu correo electrónico" required>
+                    </div>
+                    <input type="text" name="subject" placeholder="Asunto (Ej. Consulta de entrega)" required>
+                    <textarea rows="4" name="message" placeholder="Escribe tu mensaje o dirección de referencia..." required></textarea>
+
+                    <button type="submit" class="btn-submit-locate">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Consulta
+                    </button>
+
+                    <div id="locateFeedback" class="locate-feedback" style="display: none;">
+                        <i class="fa-solid fa-circle-check"></i> ¡Consulta recibida! Nuestro equipo te responderá pronto.
+                    </div>
                 </form>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <section class="footer">
-        <h4 style="text-align: center;">About Us</h4>
-        <p style="text-align: center;">
-        ”Explora los productos que tenemos para ti."
-        </p>
-            <p style="text-align: center;">© Copyright 2025 FoodApp</pstyle="text-align: center;">
-        </div>
-    </section>
+    <footer class="sipago-footer">
+        <p>© 2026 <strong>SIPAGO • FoodApp</strong> — Explora los productos que tenemos para ti.</p>
+    </footer>
+
+    <script>
+        function enviarConsultaUbicacion(event) {
+            event.preventDefault();
+            const feedback = document.getElementById('locateFeedback');
+            feedback.style.display = 'flex';
+            document.getElementById('locateForm').reset();
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 4500);
+        }
+    </script>
 </body>
-
 </html>

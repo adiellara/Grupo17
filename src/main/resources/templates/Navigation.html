@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home : Pavan Tea</title>
-    <link rel="stylesheet" href="" th:href="@{/css/Navigation.css}">
-    <link rel="stylesheet" href="" th:href="@{/css/Home.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Navegación - SIPAGO</title>
 </head>
 <body>
-    <nav th:fragment="navbar()">
-        <img th:src="@{/Images/logo.png}" alt="Logo" class="logo">
-        <ul>
-            <li><a href="/home">Inicio</a></li>
-            <li><a href="/products">Productos</a></li>
-            <li><a href="/location">Ubicacion</a></li>
-            <li><a href="/about">Sobre la App</a></li>
-            <li><a href="/login">Ingresar <i class="fa-duotone fa-arrow-left-to-arc"></i></a></li>
+    <nav th:fragment="navbar()" class="sipago-nav">
+        <a th:href="@{/home}" class="nav-logo-link">
+            <img th:src="@{/Images/logo.png}" onerror="this.src='/images/logo.png'" alt="Logo SIPAGO" class="logo">
+            <span class="nav-brand-text">SIPAGO</span>
+        </a>
+        <ul class="nav-links">
+            <li><a th:href="@{/home}"><i class="fa-solid fa-house"></i> Inicio</a></li>
+            <li><a th:href="@{/products}"><i class="fa-solid fa-utensils"></i> Productos</a></li>
+            <li><a th:href="@{/location}"><i class="fa-solid fa-location-dot"></i> Ubicación</a></li>
+            <li><a th:href="@{/about}"><i class="fa-solid fa-circle-info"></i> Sobre la App</a></li>
+            <li><a th:href="@{/login}" class="nav-btn-login"><i class="fa-solid fa-right-to-bracket"></i> Ingresar</a></li>
+            <li><a th:href="@{/admin}" class="nav-btn-admin" title="Acceso Administrativo"><i class="fa-solid fa-shield-halved"></i> Admin</a></li>
         </ul>
     </nav>
 </body>

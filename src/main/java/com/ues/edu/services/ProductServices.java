@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 /**
  * Provee las funcionalidades del Mantenimiento de Productos
  *
- * @author Karla Estefany Menendez Roman
+ * @author Susana Guadalupe Martínez Medrano
  *
  */
 @Service
@@ -57,5 +57,9 @@ public class ProductServices {
         }
         return null;
 
+    }
+    public List<Product> searchProductsByName(String name) {
+        // Llama al nuevo método que creamos en el repositorio
+        return this.productRepository.findByPnameContainingIgnoreCase(name);
     }
 }
