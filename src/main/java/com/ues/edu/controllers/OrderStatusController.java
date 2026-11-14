@@ -1,48 +1,58 @@
 package com.ues.edu.controllers;
 
-import com.ues.edu.entities.CreditCardForm;
-import com.ues.edu.entities.Order;
-import com.ues.edu.entities.OrderStatus;
-import com.ues.edu.services.OrderStatusService;
+import java.util.Arrays;
+import java.util.List;
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/**
- *
- * @author Carlos Alex
- */
+import com.ues.edu.entities.Orders;
+import com.ues.edu.services.OrderServices;
+
 @Controller
 public class OrderStatusController {
 
-    @Autowired
-    OrderStatusService orderStatusService;
+    private static final List<String> ESTADOS_VALIDOS = Arrays.asList("INGRESADA", "PREPARANDO", "ENTREGADA");
 
-    @GetMapping("/order/{id}")
-    public String viewOrderStatus(@PathVariable("id") int id, Model model) {
-        Order order = orderStatusService.getOrderDetails(id);
+    @Autowired
+    private OrderServices orderServices;
+
+    // Vista de rastreo de una orden (Cliente o Personal)
+    @GetMapping("/order/status/{id}")
+    public String viewOrderStatus(@PathVariable("id") int id, HttpSession session, Model model) {
+        if (session.getAttribute("usuarioLogueado") == null && session.getAttribute("adminLogueado") == null) {
+            return "redirect:/login";
+        }
+        Orders order = orderServices.getOrderById(id);
         if (order == null) {
-            // Handle order not found, e.g., redirect to an error page
-            return "errorPage";
+            return "redirect:/user/home";
         }
         model.addAttribute("order", order);
-        return "orderStatus"; // JSP or Thymeleaf template for displaying order status
-    }
-    @GetMapping("/OrderStatus")
-        public String viewOrderStatus(Model model) {
-        model.addAttribute("orderStatus", new Order());
+        model.addAttribute("esStaff", session.getAttribute("adminLogueado") != null);
         return "orderStatus";
     }
 
-//    @PostMapping("/order/{id}/updateStatus")
-//    public String updateOrderStatus(@PathVariable("id") int id,
-//            @RequestParam("newStatus") OrderStatus newStatus) {
-//        orderStatusService.updateOrderStatus(id, newStatus);
-//        return "redirect:/order/" + id; // Redirect back to the order status page
-//    }
+    // Cambio de estado en Cocina: INGRESADA -> PREPARANDO -> ENTREGADA
+    @PostMapping("/order/{id}/updateStatus")
+    public String updateOrderStatus(@PathVariable("id") int id,
+                                    @RequestParam("nuevoEstado") String nuevoEstado,
+                                    HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("adminLogueado") == null) {
+            return "redirect:/admin";
+        }
 
+        Orders order = orderServices.getOrderById(id);
+        if (order != null && ESTADOS_VALIDOS.contains(nuevoEstado)) {
+            order.setEstadoOrden(nuevoEstado);
+            orderServices.saveOrder(order);
+            redirectAttributes.addFlashAttribute("success",
+                    "Orden #" + id + " actualizada a estado: " + nuevoEstado);
+        }
+        return "redirect:/admin/services";
+    }
 }

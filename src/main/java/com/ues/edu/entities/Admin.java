@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -13,7 +14,8 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * Entidad que representa a los administradores del sistema SIPAGO.
+ * Entidad que representa al personal operativo y administrativo de SIPAGO.
+ * Roles soportados: ADMIN, GERENTE, CAJERO, COCINERO
  *
  * @author Carlos Alexander De Leon
  */
@@ -26,7 +28,7 @@ public class Admin {
     private int adminId;
 
     @NotNull
-    @NotBlank(message = "El nombre del administrador es obligatorio")
+    @NotBlank(message = "El nombre es obligatorio")
     @Column(nullable = false, length = 100)
     private String adminName;
 
@@ -43,49 +45,32 @@ public class Admin {
     @Column(length = 20)
     private String adminNumber;
 
-    public int getAdminId() {
-        return adminId;
+    @Column(nullable = false, length = 30)
+    private String rol = "ADMIN"; // ADMIN, GERENTE, CAJERO, COCINERO
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.rol == null || this.rol.trim().isEmpty()) {
+            this.rol = "ADMIN";
+        }
     }
 
-    public void setAdminId(int adminId) {
-        this.adminId = adminId;
-    }
-
-    public String getAdminName() {
-        return adminName;
-    }
-
-    public void setAdminName(String adminName) {
-        this.adminName = adminName;
-    }
-
-    public String getAdminEmail() {
-        return adminEmail;
-    }
-
-    public void setAdminEmail(String adminEmail) {
-        this.adminEmail = adminEmail;
-    }
-
-    public String getAdminPassword() {
-        return adminPassword;
-    }
-
-    public void setAdminPassword(String adminPassword) {
-        this.adminPassword = adminPassword;
-    }
-
-    public String getAdminNumber() {
-        return adminNumber;
-    }
-
-    public void setAdminNumber(String adminNumber) {
-        this.adminNumber = adminNumber;
-    }
+    public int getAdminId() { return adminId; }
+    public void setAdminId(int adminId) { this.adminId = adminId; }
+    public String getAdminName() { return adminName; }
+    public void setAdminName(String adminName) { this.adminName = adminName; }
+    public String getAdminEmail() { return adminEmail; }
+    public void setAdminEmail(String adminEmail) { this.adminEmail = adminEmail; }
+    public String getAdminPassword() { return adminPassword; }
+    public void setAdminPassword(String adminPassword) { this.adminPassword = adminPassword; }
+    public String getAdminNumber() { return adminNumber; }
+    public void setAdminNumber(String adminNumber) { this.adminNumber = adminNumber; }
+    public String getRol() { return rol; }
+    public void setRol(String rol) { this.rol = rol; }
 
     @Override
     public String toString() {
         return "Admin [adminId=" + adminId + ", adminName=" + adminName + ", adminEmail=" + adminEmail
-                + ", adminNumber=" + adminNumber + "]";
+                + ", adminNumber=" + adminNumber + ", rol=" + rol + "]";
     }
 }

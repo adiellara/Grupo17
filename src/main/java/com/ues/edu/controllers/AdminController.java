@@ -63,17 +63,22 @@ public class AdminController {
 
     @PostMapping("/adminLogin")
     public String getAllData(@ModelAttribute("adminLogin") AdminLogin login,
-                             RedirectAttributes redirectAttributes,
-                             HttpSession session) {
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
         String email = login.getEmail();
         String password = login.getPassword();
 
         if (adminServices.validateAdminCredentials(email, password)) {
             Admin adminCompleto = adminServices.getAdminByEmail(email);
+            String rol = (adminCompleto != null && adminCompleto.getRol() != null && !adminCompleto.getRol().trim().isEmpty())
+                    ? adminCompleto.getRol().trim().toUpperCase()
+                    : "ADMIN";
+
             session.setAttribute("adminLogueado", adminCompleto != null ? adminCompleto : email);
+            session.setAttribute("rolOperativo", rol);
             return "redirect:/admin/services";
         } else {
-            redirectAttributes.addFlashAttribute("error", "❌ Credenciales incorrectas. Intenta nuevamente.");
+            redirectAttributes.addFlashAttribute("error", "❌ Credenciales de Acceso Operativo incorrectas.");
             return "redirect:/admin";
         }
     }
@@ -85,9 +90,9 @@ public class AdminController {
     // === BÚSQUEDA DE PRODUCTO Y ORDEN PARA CLIENTE LOGUEADO ===
     @PostMapping("/product/search")
     public String seachHandler(@RequestParam("productName") String name,
-                               HttpSession session,
-                               Model model,
-                               RedirectAttributes redirectAttributes) {
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         User usuarioSesion = (User) session.getAttribute("usuarioLogueado");
         if (usuarioSesion == null) {
             redirectAttributes.addFlashAttribute("error", "Debes iniciar sesión para buscar productos.");
@@ -111,9 +116,8 @@ public class AdminController {
 
     @PostMapping("/product/order")
     public String orderHandler(@ModelAttribute Orders order,
-                               HttpSession session,
-                               Model model,
-                               RedirectAttributes redirectAttributes) {
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
         User usuarioSesion = (User) session.getAttribute("usuarioLogueado");
         if (usuarioSesion == null) {
             redirectAttributes.addFlashAttribute("error", "Debes iniciar sesión para realizar una orden.");
@@ -125,11 +129,11 @@ public class AdminController {
         order.setUser(usuarioSesion);
         order.setOrderDate(new Date());
         order.setActivo(true);
+        order.setEstadoOrden("INGRESADA");
+        order.setEstadoPago("PENDIENTE");
         this.orderServices.saveOrder(order);
 
-        model.addAttribute("amount", totalAmount);
-        model.addAttribute("productName", order.getoName());
-        return "Order_success";
+        return "redirect:/pago/" + order.getoId();
     }
 
     @GetMapping({"/product/back", "/buyProduct"})
@@ -154,6 +158,16 @@ public class AdminController {
             return "redirect:/admin";
         }
 
+        // Respaldo y normalización del rol en sesión
+        Object obj = session.getAttribute("adminLogueado");
+        Object rolSesion = session.getAttribute("rolOperativo");
+        if (rolSesion == null || rolSesion.toString().trim().isEmpty()) {
+            String rolFallback = (obj instanceof Admin && ((Admin) obj).getRol() != null && !((Admin) obj).getRol().trim().isEmpty())
+                    ? ((Admin) obj).getRol().trim().toUpperCase()
+                    : "ADMIN";
+            session.setAttribute("rolOperativo", rolFallback);
+        }
+
         model.addAttribute("users", this.services.getAllUser());
         model.addAttribute("admins", this.adminServices.getAll());
         model.addAttribute("products", this.productServices.getAllProducts());
@@ -164,13 +178,17 @@ public class AdminController {
     @GetMapping("/addAdmin")
     public String addAdminPage(HttpSession session, HttpServletResponse response) {
         applyNoCacheHeaders(response);
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         return "Add_Admin";
     }
 
     @PostMapping("/addingAdmin")
     public String addAdmin(@ModelAttribute Admin admin, HttpSession session, RedirectAttributes redirectAttributes) {
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         try {
             if (adminServices.getAdminByEmail(admin.getAdminEmail()) != null) {
                 redirectAttributes.addFlashAttribute("error", "Ya existe un administrador con ese correo.");
@@ -186,7 +204,9 @@ public class AdminController {
     @GetMapping("/updateAdmin/{adminId}")
     public String update(@PathVariable("adminId") int id, Model model, HttpSession session, HttpServletResponse response) {
         applyNoCacheHeaders(response);
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         Admin admin = this.adminServices.getAdmin(id);
         model.addAttribute("admin", admin);
         return "Update_Admin";
@@ -194,14 +214,18 @@ public class AdminController {
 
     @GetMapping("/updatingAdmin/{id}")
     public String updateAdmin(@ModelAttribute Admin admin, @PathVariable("id") int id, HttpSession session) {
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         this.adminServices.update(admin, id);
         return "redirect:/admin/services";
     }
 
     @GetMapping("/deleteAdmin/{id}")
     public String deleteAdmin(@PathVariable("id") int id, HttpSession session) {
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         this.adminServices.delete(id);
         return "redirect:/admin/services";
     }
@@ -209,14 +233,18 @@ public class AdminController {
     @GetMapping("/addProduct")
     public String addProduct(HttpSession session, HttpServletResponse response) {
         applyNoCacheHeaders(response);
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         return "Add_Product";
     }
 
     @GetMapping("/updateProduct/{productId}")
     public String updateProduct(@PathVariable("productId") int id, Model model, HttpSession session, HttpServletResponse response) {
         applyNoCacheHeaders(response);
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         Product product = this.productServices.getProduct(id);
         model.addAttribute("product", product);
         return "Update_Product";
@@ -225,14 +253,18 @@ public class AdminController {
     @GetMapping("/addUser")
     public String addUser(HttpSession session, HttpServletResponse response) {
         applyNoCacheHeaders(response);
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         return "Add_User";
     }
 
     @GetMapping("/updateUser/{userId}")
     public String updateUserPage(@PathVariable("userId") int id, Model model, HttpSession session, HttpServletResponse response) {
         applyNoCacheHeaders(response);
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         User user = this.services.getUser(id);
         model.addAttribute("user", user);
         return "Update_User";
@@ -248,7 +280,9 @@ public class AdminController {
     @GetMapping("/admin/searchUsers")
     public String searchUsers(@RequestParam("keyword") String keyword, Model model, HttpSession session, HttpServletResponse response) {
         applyNoCacheHeaders(response);
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
 
         List<User> results = services.searchUsers(keyword);
         if (results.isEmpty()) {
@@ -266,7 +300,9 @@ public class AdminController {
 
     @GetMapping("/toggleOrderStatus/{id}")
     public String toggleOrderStatus(@PathVariable("id") int id, HttpSession session, RedirectAttributes redirectAttributes) {
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         orderServices.toggleOrderStatus(id);
         redirectAttributes.addFlashAttribute("success", "Estado de la orden actualizado correctamente.");
         return "redirect:/admin/services";
@@ -274,9 +310,37 @@ public class AdminController {
 
     @GetMapping("/deleteOrder/{id}")
     public String deleteOrder(@PathVariable("id") int id, HttpSession session, RedirectAttributes redirectAttributes) {
-        if (!isAdminAuthenticated(session)) return "redirect:/admin";
+        if (!isAdminAuthenticated(session)) {
+            return "redirect:/admin";
+        }
         orderServices.deleteOrder(id);
         redirectAttributes.addFlashAttribute("success", "Orden eliminada correctamente.");
         return "redirect:/admin/services";
     }
+
+    @PostMapping("/admin/crearOrdenCaja")
+    public String crearOrdenDesdeCaja(@RequestParam("userId") int userId,
+            @RequestParam("productId") int productId,
+            @RequestParam("cantidad") int cantidad,
+            HttpSession session) {
+        if (session.getAttribute("adminLogueado") == null) {
+            return "redirect:/admin";
+        }
+        User cliente = services.getUser(userId);
+        Product prod = productServices.getProduct(productId);
+        if (cliente != null && prod != null && cantidad > 0) {
+            Orders orden = new Orders();
+            orden.setUser(cliente);
+            orden.setoName(prod.getPname());
+            orden.setoPrice(prod.getPprice());
+            orden.setoQuantity(cantidad);
+            orden.setTotalAmmout(Math.round((prod.getPprice() * cantidad) * 100.0) / 100.0);
+            orden.setEstadoOrden("INGRESADA");
+            orden.setEstadoPago("PENDIENTE");
+            orderServices.saveOrder(orden);
+            return "redirect:/pago/" + orden.getoId();
+        }
+        return "redirect:/admin/services";
+    }
+
 }

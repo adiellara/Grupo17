@@ -1,17 +1,130 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Ticket de Compra</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket de Compra - SIPAGO</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            background-color: #12151c;
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .receipt {
+            background: #ffffff;
+            color: #111827;
+            width: 100%;
+            max-width: 390px;
+            padding: 28px 24px;
+            border-radius: 8px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.65);
+        }
+        .dashed {
+            border-top: 1px dashed #6b7280;
+            margin: 14px 0;
+        }
+        @media print {
+            body { background: #ffffff; padding: 0; }
+            .no-print { display: none !important; }
+            .receipt { box-shadow: none; max-width: 100%; }
+        }
+    </style>
 </head>
-<body class="container mt-5">
-    <div class="card p-4">
-        <h2 class="text-center mb-4">Ticket de Compra</h2>
-        <p><strong>Código:</strong> <span th:text="${ticket.codigo}"></span></p>
-        <p><strong>Titular:</strong> <span th:text="${ticket.titular}"></span></p>
-        <p><strong>Monto:</strong> $<span th:text="${ticket.monto}"></span></p>
-        <p><strong>Fecha:</strong> <span th:text="${#temporals.format(ticket.fecha, 'dd/MM/yyyy HH:mm')}"></span></p>
-        <a href="/pago" class="btn btn-primary mt-3">Volver</a>
+<body>
+    <div class="receipt">
+        <div class="text-center">
+            <h4 class="fw-bold mb-0">SIPAGO RESTAURANTE</h4>
+            <small class="text-muted">San Salvador, El Salvador</small><br>
+            <small class="text-muted">Comprobante Oficial de Orden</small>
+        </div>
+
+        <div class="dashed"></div>
+
+        <div class="small">
+            <div class="d-flex justify-content-between">
+                <span>Orden #:</span>
+                <strong th:text="${order.oId}">1</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Fecha:</span>
+                <span th:text="${#dates.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">13/11/2026</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Cliente:</span>
+                <span th:text="${order.user != null ? order.user.uname : 'Cliente Mostrador'}">Cliente</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Estado Cocina:</span>
+                <strong th:text="${order.estadoOrden}">INGRESADA</strong>
+            </div>
+        </div>
+
+        <div class="dashed"></div>
+
+        <table class="table table-sm table-borderless small mb-0">
+            <thead>
+                <tr class="border-bottom">
+                    <th>Cant.</th>
+                    <th>Producto</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td th:text="${order.oQuantity}">1</td>
+                    <td th:text="${order.oName}">Platillo</td>
+                    <td class="text-end" th:text="'$' + ${#numbers.formatDecimal(order.totalAmmout, 1, 2)}">$0.00</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="dashed"></div>
+
+        <div class="small">
+            <div class="d-flex justify-content-between fs-6 fw-bold">
+                <span>TOTAL PAGADO:</span>
+                <span th:text="'$' + ${#numbers.formatDecimal(order.totalAmmout, 1, 2)}">$0.00</span>
+            </div>
+            <div class="d-flex justify-content-between mt-1">
+                <span>Método de Pago:</span>
+                <strong th:text="${order.metodoPago}">TARJETA</strong>
+            </div>
+            <div class="d-flex justify-content-between" th:if="${order.montoRecibido != null}">
+                <span>Monto Recibido:</span>
+                <span th:text="'$' + ${#numbers.formatDecimal(order.montoRecibido, 1, 2)}">$0.00</span>
+            </div>
+            <div class="d-flex justify-content-between" th:if="${order.cambio != null && order.cambio > 0}">
+                <span>Cambio Devuelto:</span>
+                <span th:text="'$' + ${#numbers.formatDecimal(order.cambio, 1, 2)}">$0.00</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Cod. Autorización:</span>
+                <strong th:text="${order.codigoTicket}">AUTH-0000</strong>
+            </div>
+        </div>
+
+        <div class="dashed"></div>
+        <div class="text-center small text-muted">
+            ¡Gracias por su compra!<br>
+            Presente este ticket para retirar su pedido.
+        </div>
+    </div>
+
+    <div class="mt-3 d-flex gap-2 no-print">
+        <button onclick="window.print()" class="btn btn-warning fw-bold">
+            <i class="fa-solid fa-print me-1"></i> Imprimir / Guardar PDF
+        </button>
+        <a th:href="${esStaff ? '/admin/services' : '/user/home'}" class="btn btn-outline-light">
+            <i class="fa-solid fa-house me-1"></i> Volver al Portal
+        </a>
     </div>
 </body>
 </html>

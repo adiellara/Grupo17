@@ -3,20 +3,20 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Panel de Administración y Seguridad - SIPAGO</title>
+        <title>Acceso Operativo - SIPAGO</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" th:href="@{/css/Admin_Page.css}" />
     </head>
 
-    <body>
+   <body th:with="rol=${(session.rolOperativo != null and !#strings.isEmpty(session.rolOperativo)) ? #strings.toUpperCase(#strings.trim(session.rolOperativo)) : 'ADMIN'}">
         <!-- BARRA DE NAVEGACIÓN Y SEGURIDAD SUPERIOR -->
         <header class="admin-navbar">
             <div class="nav-brand">
                 <i class="fa-solid fa-shield-halved brand-icon"></i>
                 <div>
-                    <span class="brand-title">SIPAGO Admin</span>
-                    <span class="security-badge"><i class="fa-solid fa-lock"></i> Sesión Protegida</span>
+                    <span class="brand-title">SIPAGO — Acceso Operativo</span>
+                    <span class="security-badge"><i class="fa-solid fa-lock"></i> Rol: <strong th:text="${rol}">ADMIN</strong></span>
                 </div>
             </div>
 
@@ -24,47 +24,62 @@
                 <div class="user-pill">
                     <div class="user-pill">
                         <i class="fa-solid fa-user-shield"></i>
-                        <span th:text="${session.adminLogueado != null ? session.adminLogueado.adminName : 'Administrador'}">Administrador</span>
+                        <span th:text="${session.adminLogueado != null ? session.adminLogueado.adminName : 'Operador'}">Operador</span>
                     </div>
                     <a th:href="@{/admin/logout}" class="logout-btn">
                         <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
                     </a>
                 </div>
+            </div>
         </header>
 
         <main class="admin-container">
-            <!-- MENÚ DE PESTAÑAS (TABS) -->
+            <!-- MENÚ DE PESTAÑAS FILTRADO POR ROL OPERATIVO -->
             <nav class="tabs-bar" role="tablist">
-                <button type="button" class="tab-btn active" data-tab="tab-admins" onclick="switchTab('tab-admins', this)">
-                    <i class="fa-solid fa-user-tie"></i> Administradores
+                <button type="button" class="tab-btn active" data-tab="tab-admins"
+                        th:if="${rol == 'ADMIN'}"
+                        onclick="switchTab('tab-admins', this)">
+                    <i class="fa-solid fa-user-tie"></i> Personal Operativo
                     <span class="tab-count" th:text="${#lists.size(admins)}">0</span>
                 </button>
-                <button type="button" class="tab-btn" data-tab="tab-users" onclick="switchTab('tab-users', this)">
-                    <i class="fa-solid fa-users"></i> Usuarios y Accesos
+
+                <button type="button" class="tab-btn" data-tab="tab-users"
+                        th:if="${rol == 'ADMIN' or rol == 'GERENTE'}"
+                        onclick="switchTab('tab-users', this)">
+                    <i class="fa-solid fa-users"></i> Clientes y Usuarios
                     <span class="tab-count" th:text="${#lists.size(users)}">0</span>
                 </button>
-                <button type="button" class="tab-btn" data-tab="tab-products" onclick="switchTab('tab-products', this)">
+
+                <button type="button" class="tab-btn" data-tab="tab-products"
+                        th:if="${rol == 'ADMIN' or rol == 'GERENTE'}"
+                        onclick="switchTab('tab-products', this)">
                     <i class="fa-solid fa-utensils"></i> Productos
                     <span class="tab-count" th:text="${#lists.size(products)}">0</span>
                 </button>
-                <button type="button" class="tab-btn" data-tab="tab-orders" onclick="switchTab('tab-orders', this)">
-                    <i class="fa-solid fa-receipt"></i> Órdenes
+
+                <button type="button" class="tab-btn" data-tab="tab-orders"
+                        th:if="${rol == 'ADMIN' or rol == 'GERENTE' or rol == 'CAJERO' or rol == 'COCINERO'}"
+                        onclick="switchTab('tab-orders', this)">
+                    <i class="fa-solid fa-receipt"></i> Órdenes, Caja y Cocina
                     <span class="tab-count" th:text="${#lists.size(orders)}">0</span>
                 </button>
-                <button type="button" class="tab-btn tab-security" data-tab="tab-audit" onclick="switchTab('tab-audit', this)">
+
+                <button type="button" class="tab-btn tab-security" data-tab="tab-audit"
+                        th:if="${rol == 'ADMIN' or rol == 'GERENTE'}"
+                        onclick="switchTab('tab-audit', this)">
                     <i class="fa-solid fa-clipboard-check"></i> Auditoría de Seguridad
                 </button>
             </nav>
 
-            <!-- PESTAÑA 1: ADMINISTRADORES -->
-            <section id="tab-admins" class="tab-panel active">
+            <!-- PESTAÑA 1: PERSONAL OPERATIVO (SOLO ADMIN) -->
+            <section id="tab-admins" class="tab-panel active" th:if="${rol == 'ADMIN'}">
                 <div class="panel-header">
                     <div>
-                        <h2>Gestión de Administradores</h2>
-                        <p class="panel-subtitle">Control de cuentas con privilegios elevados en el sistema.</p>
+                        <h2>Gestión de Personal Operativo</h2>
+                        <p class="panel-subtitle">Control de cuentas internas: Administrador, Gerente, Cajero y Cocinero.</p>
                     </div>
                     <a class="btns btn-primary" th:href="@{/addAdmin}">
-                        <i class="fa-solid fa-user-plus"></i> Nuevo Administrador
+                        <i class="fa-solid fa-user-plus"></i> Nuevo Operador
                     </a>
                 </div>
 
@@ -73,9 +88,10 @@
                         <thead>
                             <tr>
                                 <th>N°</th>
-                                <th>Nombre Administrador</th>
-                                <th>Email Administrador</th>
-                                <th>Número Contacto</th>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Rol Operativo</th>
+                                <th>Contacto</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -84,6 +100,7 @@
                                 <td th:text="${admin.adminId}"></td>
                                 <td><strong th:text="${admin.adminName}"></strong></td>
                                 <td th:text="${admin.adminEmail}"></td>
+                                <td><span class="status-active" th:text="${admin.rol != null ? admin.rol : 'ADMIN'}">ADMIN</span></td>
                                 <td th:text="${admin.adminNumber}"></td>
                                 <td class="actions-cell">
                                     <a th:href="@{'/updateAdmin/' + ${admin.adminId}}" class="action edit" title="Editar">
@@ -91,7 +108,7 @@
                                     </a>
                                     <a href="javascript:void(0);"
                                        th:data-id="${admin.adminId}"
-                                       onclick="customConfirm('¿Deseas eliminar este administrador?', () => window.location.href = '/deleteAdmin/' + this.getAttribute('data-id'));"
+                                       onclick="customConfirm('¿Deseas eliminar este operador?', () => window.location.href = '/deleteAdmin/' + this.getAttribute('data-id'));"
                                        class="action delete" title="Eliminar">
                                         <i class="fa-solid fa-trash"></i>
                                     </a>
@@ -102,19 +119,18 @@
                 </div>
             </section>
 
-            <!-- PESTAÑA 2: USUARIOS -->
-            <section id="tab-users" class="tab-panel">
+            <!-- PESTAÑA 2: USUARIOS / CLIENTES (ADMIN Y GERENTE) -->
+            <section id="tab-users" class="tab-panel" th:if="${rol == 'ADMIN' or rol == 'GERENTE'}">
                 <div class="panel-header">
                     <div>
-                        <h2>Control de Usuarios y Estados</h2>
-                        <p class="panel-subtitle">Activación, bloqueo y mantenimiento de cuentas operativas.</p>
+                        <h2>Control de Clientes y Estados</h2>
+                        <p class="panel-subtitle">Activación, bloqueo y mantenimiento de cuentas de clientes.</p>
                     </div>
                     <a class="btns btn-primary" th:href="@{/addUser}">
-                        <i class="fa-solid fa-user-plus"></i> Agregar Usuario
+                        <i class="fa-solid fa-user-plus"></i> Agregar Cliente
                     </a>
                 </div>
 
-                <!-- Buscador moderno + filtro -->
                 <div class="filter-search-container">
                     <div class="search-box">
                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
@@ -127,7 +143,7 @@
                     <div class="filter-container">
                         <label for="filter">Estado:</label>
                         <select id="filter" onchange="filtrarUsuarios()">
-                            <option value="todos">Todos los usuarios</option>
+                            <option value="todos">Todos los clientes</option>
                             <option value="activos">Solo Activos</option>
                             <option value="inactivos">Solo Inactivos</option>
                         </select>
@@ -139,11 +155,11 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Nombre Usuario</th>
+                                <th>Nombre</th>
                                 <th>Email</th>
                                 <th>Teléfono</th>
                                 <th>Estado</th>
-                                <th>Acciones de Seguridad</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -160,14 +176,12 @@
                                     <a th:href="@{'/updateUser/' + ${user.u_id}}" class="action edit" title="Editar usuario">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
-
                                     <a href="javascript:void(0);"
                                        th:data-id="${user.u_id}"
                                        th:data-active="${user.activo}"
                                        onclick="const id = this.getAttribute('data-id'); const active = this.getAttribute('data-active') === 'true'; customConfirm('¿Deseas ' + (active ? 'inactivar' : 'activar') + ' este usuario?', () => window.location.href = '/toggleUserStatus/' + id);"
                                        th:text="${user.activo} ? 'Inactivar' : 'Activar'"
                                        class="action toggle"></a>
-
                                     <a href="javascript:void(0);"
                                        th:data-id="${user.u_id}"
                                        onclick="customConfirm('¿Seguro que deseas eliminar este usuario?', () => window.location.href = '/deleteUser/' + this.getAttribute('data-id'));"
@@ -181,8 +195,8 @@
                 </div>
             </section>
 
-            <!-- PESTAÑA 3: PRODUCTOS -->
-            <section id="tab-products" class="tab-panel">
+            <!-- PESTAÑA 3: PRODUCTOS (ADMIN Y GERENTE) -->
+            <section id="tab-products" class="tab-panel" th:if="${rol == 'ADMIN' or rol == 'GERENTE'}">
                 <div class="panel-header">
                     <div>
                         <h2>Catálogo de Productos</h2>
@@ -225,55 +239,98 @@
                 </div>
             </section>
 
-            <!-- PESTAÑA 4: ÓRDENES -->
-            <section id="tab-orders" class="tab-panel">
+            <!-- PESTAÑA 4: ÓRDENES, CAJA Y COCINA -->
+            <section id="tab-orders" class="tab-panel"
+                     th:if="${rol == 'ADMIN' or rol == 'GERENTE' or rol == 'CAJERO' or rol == 'COCINERO'}">
                 <div class="panel-header">
                     <div>
-                        <h2>Historial y Control de Órdenes</h2>
-                        <p class="panel-subtitle">Supervisión de pedidos realizados y estado de procesamiento.</p>
+                        <h2>Control de Órdenes — Caja y Cocina</h2>
+                        <p class="panel-subtitle">Cobro en efectivo/tarjeta, emisión de tickets y flujo de cocina (Ingresada → Preparando → Entregada).</p>
                     </div>
-                    <button type="button" class="btns btn-secondary" onclick="openSearchModal()">
-                        <i class="fa-solid fa-magnifying-glass"></i> Buscar orden por usuario
-                    </button>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <!-- Cajero o Admin pueden ingresar una orden nueva en mostrador -->
+                        <button type="button" class="btns btn-primary"
+                                th:if="${rol == 'ADMIN' or rol == 'CAJERO'}"
+                                onclick="openNewOrderModal()">
+                            <i class="fa-solid fa-cart-plus"></i> Nueva Orden (Caja)
+                        </button>
+                        <button type="button" class="btns btn-secondary" onclick="openSearchModal()">
+                            <i class="fa-solid fa-magnifying-glass"></i> Buscar por cliente
+                        </button>
+                    </div>
                 </div>
+
+                <div th:if="${success}" style="background:#14532d; color:#bbf7d0; padding:10px 16px; border-radius:8px; margin-bottom:15px;" th:text="${success}"></div>
 
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>Usuario</th>
-                                <th>Email</th>
+                                <th>#Orden</th>
+                                <th>Cliente</th>
                                 <th>Producto</th>
-                                <th>Precio</th>
                                 <th>Cant.</th>
                                 <th>Total</th>
-                                <th>Fecha</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                <th>Estado Cocina</th>
+                                <th>Estado Pago</th>
+                                <th>Acciones Operativas</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="order : ${orders}" th:classappend="${!order.activo} ? 'inactive-row' : ''">
-                                <td th:text="${order.user != null ? order.user.uname : 'N/A'}"></td>
-                                <td th:text="${order.user != null ? order.user.uemail : 'N/A'}"></td>
-                                <td><strong th:text="${order.oName}"></strong></td>
-                                <td th:text="'$' + ${order.oPrice}"></td>
-                                <td th:text="${order.oQuantity}"></td>
-                                <td><strong th:text="'$' + ${order.totalAmmout}"></strong></td>
-                                <td th:text="${order.orderDate}"></td>
-                                <td>
-                                    <span th:text="${order.activo} ? 'Activa' : 'Inactiva'"
-                                          th:classappend="${order.activo} ? 'status-active' : 'status-inactive'"></span>
-                                </td>
-                                <td class="actions-cell">
-                                    <a href="javascript:void(0);"
-                                       th:data-id="${order.oId}"
-                                       th:data-active="${order.activo}"
-                                       onclick="const id = this.getAttribute('data-id'); const active = this.getAttribute('data-active') === 'true'; customConfirm('¿Deseas ' + (active ? 'inactivar' : 'activar') + ' esta orden?', () => window.location.href = '/toggleOrderStatus/' + id);"
-                                       th:text="${order.activo} ? 'Inactivar' : 'Activar'"
-                                       class="action toggle"></a>
+                                <td><strong th:text="'#' + ${order.oId}">#1</strong></td>
+                                <td th:text="${order.user != null ? order.user.uname : 'Mostrador'}">Cliente</td>
+                                <td><strong th:text="${order.oName}">Producto</strong></td>
+                                <td th:text="${order.oQuantity}">1</td>
+                                <td><strong th:text="'$' + ${#numbers.formatDecimal(order.totalAmmout, 1, 2)}">$0.00</strong></td>
 
-                                    <a href="javascript:void(0);"
+                                <!-- ESTADO DE COCINA (COCINERO / ADMIN) -->
+                                <td>
+                                    <form th:if="${rol == 'COCINERO' or rol == 'ADMIN'}"
+                                          th:action="@{'/order/' + ${order.oId} + '/updateStatus'}" method="post"
+                                          style="display:flex; gap:6px; align-items:center;">
+                                        <select name="nuevoEstado" style="padding:4px 8px; border-radius:6px; background:#12151c; color:#fff; border:1px solid #475569;">
+                                            <option value="INGRESADA" th:selected="${order.estadoOrden == 'INGRESADA'}">INGRESADA</option>
+                                            <option value="PREPARANDO" th:selected="${order.estadoOrden == 'PREPARANDO'}">PREPARANDO</option>
+                                            <option value="ENTREGADA" th:selected="${order.estadoOrden == 'ENTREGADA'}">ENTREGADA</option>
+                                        </select>
+                                        <button type="submit" class="action edit" title="Actualizar estado de cocina" style="border:none; cursor:pointer;">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    </form>
+                                    <span th:unless="${rol == 'COCINERO' or rol == 'ADMIN'}"
+                                          class="status-active"
+                                          th:text="${order.estadoOrden != null ? order.estadoOrden : 'INGRESADA'}">INGRESADA</span>
+                                </td>
+
+                                <!-- ESTADO DE PAGO -->
+                                <td>
+                                    <span th:if="${order.estadoPago == 'PAGADO'}" class="status-active">
+                                        PAGADO (<span th:text="${order.metodoPago}">EFECTIVO</span>)
+                                    </span>
+                                    <span th:unless="${order.estadoPago == 'PAGADO'}" class="status-inactive">
+                                        PENDIENTE
+                                    </span>
+                                </td>
+
+                                <!-- ACCIONES DE CAJA / TICKET / ADMIN -->
+                                <td class="actions-cell">
+                                    <!-- CAJERO O ADMIN: Cobrar si está PENDIENTE -->
+                                    <a th:if="${(rol == 'CAJERO' or rol == 'ADMIN') and order.estadoPago != 'PAGADO'}"
+                                       th:href="@{'/pago/' + ${order.oId}}"
+                                       class="action toggle" style="background:#eab308; color:#111827; font-weight:700;">
+                                        <i class="fa-solid fa-cash-register"></i> Cobrar
+                                    </a>
+
+                                    <!-- TODOS LOS ROLES OPERATIVOS: Ver Ticket si ya está PAGADO -->
+                                    <a th:if="${order.estadoPago == 'PAGADO'}"
+                                       th:href="@{'/pago/ticket/' + ${order.oId}}"
+                                       class="action edit" title="Ver e imprimir Ticket">
+                                        <i class="fa-solid fa-receipt"></i> Ticket
+                                    </a>
+
+                                    <!-- SOLO ADMIN: Eliminar orden -->
+                                    <a th:if="${rol == 'ADMIN'}" href="javascript:void(0);"
                                        th:data-id="${order.oId}"
                                        onclick="customConfirm('¿Seguro que deseas eliminar esta orden?', () => window.location.href = '/deleteOrder/' + this.getAttribute('data-id'));"
                                        class="action delete" title="Eliminar">
@@ -286,12 +343,12 @@
                 </div>
             </section>
 
-            <!-- PESTAÑA 5: AUDITORÍA DE SEGURIDAD (FoodApp_v2) -->
-            <section id="tab-audit" class="tab-panel">
+            <!-- PESTAÑA 5: AUDITORÍA DE SEGURIDAD (ADMIN Y GERENTE) -->
+            <section id="tab-audit" class="tab-panel" th:if="${rol == 'ADMIN' or rol == 'GERENTE'}">
                 <div class="panel-header">
                     <div>
-                        <h2>Bitácora de Auditoría y Seguridad (`audit_log`)</h2>
-                        <p class="panel-subtitle">Trazabilidad de operaciones críticas y control de acceso administrativo.</p>
+                        <h2>Bitácora de Auditoría y Seguridad</h2>
+                        <p class="panel-subtitle">Trazabilidad de operaciones críticas y control de acceso operativo.</p>
                     </div>
                     <span class="audit-status-pill"><i class="fa-solid fa-circle-check"></i> Control de Caché y Sesión Activos</span>
                 </div>
@@ -305,52 +362,49 @@
                         </div>
                     </div>
                     <div class="sec-card">
-                        <i class="fa-solid fa-database"></i>
+                        <i class="fa-solid fa-users-gear"></i>
                         <div>
-                            <h4>Integridad Referencial</h4>
-                            <p>Esquema <code>FoodApp_v2</code> con llaves foráneas explícitas y trazabilidad.</p>
+                            <h4>Control Basado en Roles</h4>
+                            <p>Segregación activa para <strong>Administrador, Gerente, Cajero y Cocinero</strong>.</p>
                         </div>
                     </div>
                     <div class="sec-card">
                         <i class="fa-solid fa-user-check"></i>
                         <div>
                             <h4>Cuentas Activas</h4>
-                            <p><strong th:text="${#lists.size(users)}">0</strong> usuarios registrados bajo control de estado.</p>
+                            <p><strong th:text="${#lists.size(users)}">0</strong> clientes registrados bajo control de estado.</p>
                         </div>
                     </div>
                 </div>
-
-                <div class="table-responsive" th:if="${auditLogs != null and !#lists.isEmpty(auditLogs)}">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID Evento</th>
-                                <th>Tabla Afectada</th>
-                                <th>Acción</th>
-                                <th>Registro ID</th>
-                                <th>Usuario Responsable</th>
-                                <th>Fecha / Hora</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="log : ${auditLogs}">
-                                <td th:text="${log.auditId}"></td>
-                                <td><code th:text="${log.tableName}"></code></td>
-                                <td><span class="status-active" th:text="${log.actionType}"></span></td>
-                                <td th:text="${log.recordId}"></td>
-                                <td th:text="${log.performedBy}"></td>
-                                <td th:text="${log.createdAt}"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="audit-empty-state" th:if="${auditLogs == null or #lists.isEmpty(auditLogs)}">
-                    <i class="fa-solid fa-shield-cat"></i>
-                    <p>Las políticas de validación de sesión y bloqueo de cuentas están operando correctamente. Los eventos registrados en <code>audit_log</code> se sincronizan con la base de datos <code>FoodApp_v2</code>.</p>
-                </div>
             </section>
         </main>
+
+        <!-- MODAL NUEVA ORDEN EN CAJA (CAJERO / ADMIN) -->
+        <div id="newOrderModal" class="modal" th:if="${rol == 'ADMIN' or rol == 'CAJERO'}">
+            <div class="modal-content">
+                <span class="close" onclick="closeNewOrderModal()">&times;</span>
+                <h3><i class="fa-solid fa-cart-plus"></i> Ingresar Orden en Caja</h3>
+                <form th:action="@{/admin/crearOrdenCaja}" method="post" style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
+                    <div>
+                        <label>Cliente:</label>
+                        <select name="userId" required style="width:100%; padding:8px; border-radius:6px; background:#12151c; color:#fff; border:1px solid #475569;">
+                            <option th:each="u : ${users}" th:if="${u.activo}" th:value="${u.u_id}" th:text="${u.uname + ' (' + u.uemail + ')'}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Producto:</label>
+                        <select name="productId" required style="width:100%; padding:8px; border-radius:6px; background:#12151c; color:#fff; border:1px solid #475569;">
+                            <option th:each="p : ${products}" th:value="${p.pid}" th:text="${p.pname + ' - $' + p.pprice}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Cantidad:</label>
+                        <input type="number" name="cantidad" value="1" min="1" required style="width:100%; padding:8px; border-radius:6px; background:#12151c; color:#fff; border:1px solid #475569;">
+                    </div>
+                    <button type="submit" class="btns btn-primary">Registrar e Ir a Cobrar</button>
+                </form>
+            </div>
+        </div>
 
         <!-- MODAL DE BÚSQUEDA DE ÓRDENES -->
         <div id="searchModal" class="modal">
@@ -370,12 +424,11 @@
                             <thead>
                                 <tr>
                                     <th>Usuario</th>
-                                    <th>Email</th>
                                     <th>Producto</th>
-                                    <th>Precio</th>
-                                    <th>Cantidad</th>
+                                    <th>Cant.</th>
                                     <th>Total</th>
-                                    <th>Fecha</th>
+                                    <th>Cocina</th>
+                                    <th>Pago</th>
                                 </tr>
                             </thead>
                             <tbody id="resultsBody"></tbody>
@@ -398,29 +451,32 @@
         </div>
 
         <script>
-            // === Navegación por Pestañas (Tabs) con persistencia ===
             function switchTab(tabId, btnElement) {
                 document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
                 document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
                 const targetPanel = document.getElementById(tabId);
-                if (targetPanel)
-                    targetPanel.classList.add('active');
-                if (btnElement)
-                    btnElement.classList.add('active');
+                if (targetPanel) targetPanel.classList.add('active');
+                if (btnElement) btnElement.classList.add('active');
 
                 localStorage.setItem('sipago_admin_active_tab', tabId);
             }
 
             document.addEventListener('DOMContentLoaded', () => {
+                const availableTabs = Array.from(document.querySelectorAll('.tab-btn'));
+                if (availableTabs.length === 0) return;
+
                 const savedTab = localStorage.getItem('sipago_admin_active_tab');
-                if (savedTab && document.getElementById(savedTab)) {
-                    const btn = document.querySelector(`.tab-btn[data-tab="${savedTab}"]`);
-                    switchTab(savedTab, btn);
+                const savedBtn = savedTab ? document.querySelector(`.tab-btn[data-tab="${savedTab}"]`) : null;
+
+                if (savedBtn) {
+                    switchTab(savedTab, savedBtn);
+                } else {
+                    const firstBtn = availableTabs[0];
+                    switchTab(firstBtn.getAttribute('data-tab'), firstBtn);
                 }
             });
 
-            // === Modal de confirmación personalizado ===
             const confirmModal = document.getElementById("customConfirm");
             const confirmMsg = document.getElementById("confirmMessage");
             const confirmYes = document.getElementById("confirmYes");
@@ -429,41 +485,25 @@
             function customConfirm(message, onYes) {
                 confirmMsg.textContent = message;
                 confirmModal.style.display = "flex";
-
-                confirmYes.onclick = () => {
-                    confirmModal.style.display = "none";
-                    if (onYes)
-                        onYes();
-                };
-
-                confirmNo.onclick = () => {
-                    confirmModal.style.display = "none";
-                };
+                confirmYes.onclick = () => { confirmModal.style.display = "none"; if (onYes) onYes(); };
+                confirmNo.onclick = () => { confirmModal.style.display = "none"; };
             }
 
-            // === Filtro de usuarios ===
             function filtrarUsuarios() {
                 const filtro = document.getElementById("filter").value;
                 const filas = document.querySelectorAll("#usersTable tbody tr");
-
                 filas.forEach(fila => {
                     const esInactivo = fila.classList.contains("inactive-row");
-                    if (filtro === "todos")
-                        fila.style.display = "";
-                    else if (filtro === "activos" && esInactivo)
-                        fila.style.display = "none";
-                    else if (filtro === "inactivos" && !esInactivo)
-                        fila.style.display = "none";
-                    else
-                        fila.style.display = "";
+                    if (filtro === "todos") fila.style.display = "";
+                    else if (filtro === "activos" && esInactivo) fila.style.display = "none";
+                    else if (filtro === "inactivos" && !esInactivo) fila.style.display = "none";
+                    else fila.style.display = "";
                 });
             }
 
-            // === Modal de búsqueda ===
-            function openSearchModal() {
-                document.getElementById("searchModal").style.display = "flex";
-            }
-
+            function openNewOrderModal() { document.getElementById("newOrderModal").style.display = "flex"; }
+            function closeNewOrderModal() { document.getElementById("newOrderModal").style.display = "none"; }
+            function openSearchModal() { document.getElementById("searchModal").style.display = "flex"; }
             function closeSearchModal() {
                 document.getElementById("searchModal").style.display = "none";
                 document.getElementById("searchResults").style.display = "none";
@@ -473,71 +513,39 @@
             async function searchOrdersByUser(event) {
                 event.preventDefault();
                 const username = document.getElementById("usernameInput").value.trim();
-                if (!username)
-                    return;
-
+                if (!username) return;
                 try {
                     const response = await fetch(`/searchOrdersByUser?username=${encodeURIComponent(username)}`);
-                    if (!response.ok) {
-                        alert("Error buscando órdenes");
-                        return;
-                    }
-
+                    if (!response.ok) return;
                     const data = await response.json();
                     const tbody = document.getElementById("resultsBody");
                     tbody.innerHTML = "";
-
                     if (data.length === 0) {
-                        tbody.innerHTML = "<tr><td colspan='7'>No se encontraron órdenes para este usuario.</td></tr>";
+                        tbody.innerHTML = "<tr><td colspan='6'>No se encontraron órdenes para este usuario.</td></tr>";
                     } else {
                         data.forEach(order => {
-                            const row = `
+                            tbody.innerHTML += `
                             <tr>
                                 <td>${order.user ? order.user.uname : 'N/A'}</td>
-                                <td>${order.user ? order.user.uemail : 'N/A'}</td>
                                 <td>${order.oName}</td>
-                                <td>$${order.oPrice}</td>
                                 <td>${order.oQuantity}</td>
                                 <td>$${order.totalAmmout}</td>
-                                <td>${order.orderDate}</td>
+                                <td>${order.estadoOrden || 'INGRESADA'}</td>
+                                <td>${order.estadoPago || 'PENDIENTE'}</td>
                             </tr>`;
-                            tbody.innerHTML += row;
                         });
                     }
-
                     document.getElementById("searchResults").style.display = "block";
-                } catch (e) {
-                    console.error("Error al buscar órdenes:", e);
-                }
+                } catch (e) { console.error(e); }
             }
 
-            window.onclick = function (event) {
-                const modal = document.getElementById("searchModal");
-                if (event.target === modal)
-                    closeSearchModal();
-                if (event.target === confirmModal)
-                    confirmModal.style.display = "none";
-            }
-
-            // === Buscar usuarios en tiempo real ===
             function buscarUsuario() {
                 const input = document.getElementById("userSearchInput").value.toLowerCase();
                 const filas = document.querySelectorAll("#usersTable tbody tr");
-
                 filas.forEach(fila => {
                     const nombre = fila.children[1].textContent.toLowerCase();
                     const email = fila.children[2].textContent.toLowerCase();
-
-                    fila.classList.remove("highlight-row");
-
-                    if (input === "") {
-                        fila.style.display = "";
-                    } else if (nombre.includes(input) || email.includes(input)) {
-                        fila.style.display = "";
-                        fila.classList.add("highlight-row");
-                    } else {
-                        fila.style.display = "none";
-                    }
+                    fila.style.display = (input === "" || nombre.includes(input) || email.includes(input)) ? "" : "none";
                 });
             }
         </script>

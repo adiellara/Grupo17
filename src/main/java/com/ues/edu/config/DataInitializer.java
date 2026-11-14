@@ -3,13 +3,9 @@ package com.ues.edu.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
 import com.ues.edu.entities.Admin;
 import com.ues.edu.repositories.AdminRepository;
 
-/**
- * Inicializador automático de datos esenciales al arrancar SIPAGO.
- */
 @Component
 public class DataInitializer implements CommandLineRunner {
 
@@ -18,16 +14,22 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Verifica si no existe ningún administrador en la base de datos
         if (adminRepository.count() == 0) {
-            Admin defaultAdmin = new Admin();
-            defaultAdmin.setAdminName("Administrador Principal");
-            defaultAdmin.setAdminEmail("admin@sipago.com");
-            defaultAdmin.setAdminPassword("Admin1234");
-            defaultAdmin.setAdminNumber("22251500");
-
-            adminRepository.save(defaultAdmin);
-            System.out.println("Administrador por defecto creado: admin@sipago.com / Admin1234");
+            crearStaff("Administrador del Sistema", "admin@sipago.com", "Admin1234", "22251500", "ADMIN");
+            crearStaff("Gerente General", "gerente@sipago.com", "Gerente123", "22251501", "GERENTE");
+            crearStaff("Cajero Principal", "cajero@sipago.com", "Cajero123", "22251502", "CAJERO");
+            crearStaff("Chef de Cocina", "cocinero@sipago.com", "Cocinero123", "22251503", "COCINERO");
+            System.out.println("✅ Cuentas iniciales de personal creadas (ADMIN, GERENTE, CAJERO, COCINERO).");
         }
+    }
+
+    private void crearStaff(String nombre, String email, String pass, String tel, String rol) {
+        Admin staff = new Admin();
+        staff.setAdminName(nombre);
+        staff.setAdminEmail(email);
+        staff.setAdminPassword(pass);
+        staff.setAdminNumber(tel);
+        staff.setRol(rol);
+        adminRepository.save(staff);
     }
 }

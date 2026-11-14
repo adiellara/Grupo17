@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 /**
  * Entidad de Órdenes / Pedidos del sistema SIPAGO.
  *
- * @author Edith Estefany Vanegas Albánez
+ * @author 
  */
 @Entity
 @Table(name = "orders")
@@ -48,6 +48,23 @@ public class Orders {
     @Column(nullable = false)
     private boolean activo = true;
 
+    // === CAMPOS DE ESTADO DE COCINA Y PAGO ===
+    @Column(nullable = false, length = 30)
+    private String estadoOrden = "INGRESADA"; // INGRESADA, PREPARANDO, ENTREGADA
+
+    @Column(nullable = false, length = 30)
+    private String estadoPago = "PENDIENTE"; // PENDIENTE, PAGADO
+
+    @Column(length = 40)
+    private String metodoPago; // EFECTIVO, TARJETA VISA, TARJETA MASTERCARD, etc.
+
+    @Column(length = 60)
+    private String codigoTicket; // Código de autorización o folio de caja
+
+    private Double montoRecibido;
+
+    private Double cambio;
+
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_u_id", nullable = false)
     @JsonIgnoreProperties({"orders", "upassword"})
@@ -57,6 +74,12 @@ public class Orders {
     protected void onCreate() {
         if (this.orderDate == null) {
             this.orderDate = new Date();
+        }
+        if (this.estadoOrden == null || this.estadoOrden.trim().isEmpty()) {
+            this.estadoOrden = "INGRESADA";
+        }
+        if (this.estadoPago == null || this.estadoPago.trim().isEmpty()) {
+            this.estadoPago = "PENDIENTE";
         }
         if (this.totalAmmout <= 0 && this.oPrice > 0 && this.oQuantity > 0) {
             this.totalAmmout = Math.round((this.oPrice * this.oQuantity) * 100.0) / 100.0;
@@ -119,6 +142,54 @@ public class Orders {
         this.activo = activo;
     }
 
+    public String getEstadoOrden() {
+        return estadoOrden;
+    }
+
+    public void setEstadoOrden(String estadoOrden) {
+        this.estadoOrden = estadoOrden;
+    }
+
+    public String getEstadoPago() {
+        return estadoPago;
+    }
+
+    public void setEstadoPago(String estadoPago) {
+        this.estadoPago = estadoPago;
+    }
+
+    public String getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(String metodoPago) {
+        this.metodoPago = metodoPago;
+    }
+
+    public String getCodigoTicket() {
+        return codigoTicket;
+    }
+
+    public void setCodigoTicket(String codigoTicket) {
+        this.codigoTicket = codigoTicket;
+    }
+
+    public Double getMontoRecibido() {
+        return montoRecibido;
+    }
+
+    public void setMontoRecibido(Double montoRecibido) {
+        this.montoRecibido = montoRecibido;
+    }
+
+    public Double getCambio() {
+        return cambio;
+    }
+
+    public void setCambio(Double cambio) {
+        this.cambio = cambio;
+    }
+
     public User getUser() {
         return user;
     }
@@ -131,6 +202,7 @@ public class Orders {
     public String toString() {
         return "Orders [oId=" + oId + ", oName=" + oName + ", oPrice=" + oPrice + ", oQuantity=" + oQuantity
                 + ", orderDate=" + orderDate + ", totalAmmout=" + totalAmmout + ", activo=" + activo
-                + ", userId=" + (user != null ? user.getU_id() : null) + "]";
+                + ", estadoOrden=" + estadoOrden + ", estadoPago=" + estadoPago + ", metodoPago=" + metodoPago
+                + ", codigoTicket=" + codigoTicket + ", userId=" + (user != null ? user.getU_id() : null) + "]";
     }
 }

@@ -1,123 +1,203 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Pago con Tarjeta</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <!-- Bootstrap 5.3.3 (última versión estable) -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-        <!-- FontAwesome para íconos -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
-        <style>
-            body {
-                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-                font-family: 'Segoe UI', Roboto, sans-serif;
-            }
-            .card-form {
-                max-width: 480px;
-                margin: 80px auto;
-                background: #fff;
-                border-radius: 16px;
-                box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-                padding: 35px;
-            }
-            .card-form h3 {
-                color: #0d6efd;
-                font-weight: 600;
-            }
-            .form-control:focus {
-                border-color: #0d6efd;
-                box-shadow: 0 0 6px rgba(13,110,253,0.3);
-            }
-            .btn-primary {
-                width: 100%;
-                font-weight: 600;
-                padding: 10px;
-                transition: all 0.3s ease;
-            }
-            .btn-primary:hover {
-                background-color: #0b5ed7;
-                transform: scale(1.02);
-            }
-            .card-icons {
-                display: flex;
-                justify-content: center;
-                gap: 15px;
-                font-size: 2rem;
-                margin-bottom: 20px;
-            }
-            .card-icons i {
-                color: #495057;
-            }
-            .alert {
-                border-radius: 10px;
-            }
-        </style>
-    </head>
-    <body>
-
-        <div class="card-form">
-            <div class="text-center mb-3">
-                <div class="card-icons">
-                    <i class="fa-brands fa-cc-visa text-primary"></i>
-                    <i class="fa-brands fa-cc-mastercard text-danger"></i>
-                </div>
-                <h3>Pago con Tarjeta</h3>
-                <p class="text-muted">Ingrese los datos de su tarjeta para completar el pago.</p>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasarela de Pago - SIPAGO</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #12151c;
+            color: #f3f4f6;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding: 30px 15px;
+        }
+        .pay-card {
+            background-color: #181c26;
+            border: 1px solid rgba(255, 209, 102, 0.28);
+            border-radius: 16px;
+            max-width: 650px;
+            margin: 0 auto;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+        .pay-header {
+            background: linear-gradient(135deg, #1f2533, #151922);
+            padding: 24px 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .text-gold { color: #ffd166; }
+        .form-control {
+            background-color: #12151c;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+        }
+        .form-control:focus {
+            background-color: #12151c;
+            border-color: #ffd166;
+            color: #ffffff;
+            box-shadow: 0 0 0 0.2rem rgba(255, 209, 102, 0.2);
+        }
+        .nav-pills .nav-link {
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            margin-right: 10px;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #ffd166;
+            color: #111827;
+            font-weight: 600;
+            border-color: #ffd166;
+        }
+        .btn-gold {
+            background-color: #ffd166;
+            color: #111827;
+            font-weight: 700;
+            border: none;
+        }
+        .btn-gold:hover {
+            background-color: #ffc233;
+            color: #111827;
+        }
+        .test-chip {
+            cursor: pointer;
+            font-size: 0.78rem;
+            background: #232938;
+            border: 1px solid rgba(255, 209, 102, 0.35);
+            color: #ffd166;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 3px;
+            transition: 0.2s;
+        }
+        .test-chip:hover {
+            background: #ffd166;
+            color: #111827;
+        }
+    </style>
+</head>
+<body>
+    <div class="pay-card">
+        <div class="pay-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-warning text-dark mb-1" th:text="'Orden #' + ${order.oId}">Orden #1</span>
+                <h4 class="mb-0 fw-bold text-white">Procesar Pago</h4>
+                <small class="text-secondary" th:text="${order.oName} + ' (x' + ${order.oQuantity} + ')'">Producto</small>
             </div>
-
-            <form th:action="@{/pago}" th:object="${pago}" method="post">
-
-                <div class="mb-3">
-                    <label class="form-label">Nombre del Titular</label>
-                    <input type="text" th:field="*{nombreTitular}" class="form-control" placeholder="Ej. Juan Pérez" required>
-                    <div class="text-danger" th:if="${#fields.hasErrors('nombreTitular')}" th:errors="*{nombreTitular}"></div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Número de Tarjeta</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-regular fa-credit-card"></i></span>
-                        <input type="text" th:field="*{numeroTarjeta}" class="form-control" placeholder="1111 2222 3333 4444" required>
-                    </div>
-                    <div class="text-danger" th:if="${#fields.hasErrors('numeroTarjeta')}" th:errors="*{numeroTarjeta}"></div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Expiración (MM/AA)</label>
-                        <input type="text" th:field="*{fechaExpiracion}" class="form-control" placeholder="12/26" required>
-                        <div class="text-danger" th:if="${#fields.hasErrors('fechaExpiracion')}" th:errors="*{fechaExpiracion}"></div>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">CVV</label>
-                        <input type="password" th:field="*{cvv}" class="form-control" placeholder="123" maxlength="4" required>
-                        <div class="text-danger" th:if="${#fields.hasErrors('cvv')}" th:errors="*{cvv}"></div>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label">Monto</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" th:field="*{monto}" class="form-control" placeholder="Ej. 99.99" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-lock me-2"></i> Pagar de forma segura
-                </button>
-
-                <div th:if="${mensaje}" class="alert alert-success mt-4 text-center" th:text="${mensaje}"></div>
-            </form>
+            <div class="text-end">
+                <small class="text-secondary d-block">Total a Pagar</small>
+                <span class="fs-2 fw-bold text-gold" th:text="'$' + ${#numbers.formatDecimal(order.totalAmmout, 1, 2)}">$0.00</span>
+            </div>
         </div>
 
-        <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
-</html>
+        <div class="p-4">
+            <div th:if="${error}" class="alert alert-danger py-2" th:text="${error}"></div>
 
+            <ul class="nav nav-pills mb-4" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-tarjeta" type="button">
+                        <i class="fa-regular fa-credit-card me-2"></i>Pago con Tarjeta
+                    </button>
+                </li>
+                <li class="nav-item" th:if="${esStaff}">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-efectivo" type="button">
+                        <i class="fa-solid fa-money-bill-wave me-2"></i>Pago en Efectivo (Caja)
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- PAGO CON TARJETA + SIMULACIÓN API BANCO -->
+                <div class="tab-pane fade show active" id="tab-tarjeta">
+                    <div class="mb-3 p-2 rounded" style="background:#12151c; border:1px dashed rgba(255,255,255,0.14);">
+                        <small class="text-secondary d-block mb-1">
+                            <i class="fa-solid fa-flask me-1 text-gold"></i>Tarjetas de prueba (Simulación API Banco):
+                        </small>
+                        <span class="test-chip" onclick="llenarTarjeta('4532015112830366','12/28','123')">Visa Aprobada</span>
+                        <span class="test-chip" onclick="llenarTarjeta('5425233430109903','10/27','456')">Mastercard Aprobada</span>
+                        <span class="test-chip" onclick="llenarTarjeta('4000000000000000','12/28','111')">Simular Sin Fondos</span>
+                    </div>
+
+                    <form th:action="@{'/pago/tarjeta/' + ${order.oId}}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Nombre del Titular</label>
+                            <input type="text" name="cardHolder" id="cardHolder" class="form-control" placeholder="Ej. Juan Pérez" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Número de Tarjeta</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-gold">
+                                    <i class="fa-brands fa-cc-visa me-1"></i>
+                                    <i class="fa-brands fa-cc-mastercard"></i>
+                                </span>
+                                <input type="text" name="cardNumber" id="cardNumber" class="form-control" maxlength="19" placeholder="0000 0000 0000 0000" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-6">
+                                <label class="form-label small text-secondary">Expiración (MM/AA)</label>
+                                <input type="text" name="expiryDate" id="expiryDate" class="form-control" maxlength="5" placeholder="12/28" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-secondary">Código CVV</label>
+                                <input type="password" name="cvv" id="cvv" class="form-control" maxlength="4" placeholder="123" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-gold w-100 py-2">
+                            <i class="fa-solid fa-lock me-2"></i>Validar con Banco y Pagar
+                        </button>
+                    </form>
+                </div>
+
+                <!-- PAGO EN EFECTIVO (SOLO CAJERO / ACCESO OPERATIVO) -->
+                <div class="tab-pane fade" id="tab-efectivo" th:if="${esStaff}">
+                    <form th:action="@{'/pago/efectivo/' + ${order.oId}}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Efectivo Recibido del Cliente ($)</label>
+                            <input type="number" step="0.01" name="montoRecibido" id="montoRecibido"
+                                   class="form-control form-control-lg" th:min="${order.totalAmmout}"
+                                   th:value="${order.totalAmmout}" oninput="calcularCambio()" required>
+                        </div>
+                        <div class="p-3 rounded mb-4 d-flex justify-content-between align-items-center" style="background:#12151c;">
+                            <span class="text-secondary">Cambio a devolver:</span>
+                            <span class="fs-4 fw-bold text-success" id="cambioTexto">$0.00</span>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
+                            <i class="fa-solid fa-receipt me-2"></i>Confirmar Efectivo y Generar Ticket
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a th:href="${esStaff ? '/admin/services' : '/user/home'}" class="text-secondary small text-decoration-none">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Volver sin pagar ahora
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        const totalOrden = /*[[${order.totalAmmout}]]*/ 0;
+        function llenarTarjeta(num, exp, cvv) {
+            document.getElementById('cardNumber').value = num;
+            document.getElementById('expiryDate').value = exp;
+            document.getElementById('cvv').value = cvv;
+            if (!document.getElementById('cardHolder').value) {
+                document.getElementById('cardHolder').value = 'CLIENTE SIPAGO';
+            }
+        }
+        function calcularCambio() {
+            const recibido = parseFloat(document.getElementById('montoRecibido').value) || 0;
+            const cambio = Math.max(0, recibido - totalOrden);
+            document.getElementById('cambioTexto').textContent = '$' + cambio.toFixed(2);
+        }
+    </script>
+</body>
+</html>

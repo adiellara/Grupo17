@@ -11,7 +11,7 @@ import com.ues.edu.loginCredentials.AdminLogin;
 import com.ues.edu.services.ProductServices;
 
 /**
- * Modulo Bienvenida
+ * Módulo Bienvenida
  *
  * @author Carlos Alexander De Leon
  */
@@ -23,7 +23,6 @@ public class HomeController {
 
     @GetMapping(value = {"/home", "/"})
     public String home(Model model) {
-        System.out.println("--> Accediendo a la pagina principal (/home)");
         List<Product> featuredProducts = this.productServices.getAllProducts();
         model.addAttribute("featuredProducts", featuredProducts);
         return "Home";
@@ -31,7 +30,6 @@ public class HomeController {
 
     @GetMapping("/products")
     public String products(Model model) {
-        System.out.println("--> Consultando catalogo publico (/products)");
         List<Product> allProducts = this.productServices.getAllProducts();
         model.addAttribute("products", allProducts);
         return "Products";
@@ -47,10 +45,9 @@ public class HomeController {
         return "About";
     }
 
-    @GetMapping("/admin")
+    @GetMapping(value = {"/admin", "/operativo"})
     public String loginAdd(Model model) {
-        System.out.println("--> Accediendo a login administrativo (/admin)");
         model.addAttribute("adminLogin", new AdminLogin());
-        return "Log_Admin";
+        return "AdminLogin";
     }
 }

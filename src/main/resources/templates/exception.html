@@ -1,58 +1,164 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Error</title>
-	<style>
-		.mainContainer {
-			position: relative;
-			top: 80px;
-		}
-
-		.container {
-			width: 500px;
-			font-family: cursive;
-			font-weight: bold;
-		}
-
-		h1 {
-			color: rgb(246, 160, 160);
-		}
-
-		a {
-			position: relative;
-			top: 30px;
-			background-color: darkslategray;
-			padding: 3px;
-			color: white;
-			text-decoration: none;
-		}
-
-		img {
-			height: 200px;
-		}
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviso del Sistema - SIPAGO</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top, #1f2636, #0f1218 75%);
+            color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .error-card {
+            background-color: #181c26;
+            border: 1px solid rgba(255, 209, 102, 0.28);
+            border-radius: 18px;
+            max-width: 520px;
+            width: 100%;
+            padding: 40px 32px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+        }
+        .icon-circle {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.14);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #9ca3af;
+            font-size: 0.92rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .reasons-box {
+            background-color: #12151c;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px 18px;
+            text-align: left;
+            margin-bottom: 26px;
+        }
+        .reasons-box p {
+            color: #ffd166;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .reasons-box ul {
+            list-style: none;
+            font-size: 0.85rem;
+            color: #d1d5db;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .reasons-box li i {
+            color: #f87171;
+            margin-right: 8px;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-gold {
+            background-color: #ffd166;
+            color: #111827;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 11px 22px;
+            border-radius: 10px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-gold:hover {
+            background-color: #ffc233;
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: #cbd5e1;
+            border: 1.5px solid rgba(255, 255, 255, 0.18);
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 11px 22px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+        }
+    </style>
 </head>
-
 <body>
-	<center>
-		<div class="mainContainer">
-			<div class="image">
-				<img src="/Images/repairImage.jpg" alt="ErrorLogo" />
-			</div>
-			<div class="container">
-				<h1>Ooops...Sorry..!!!</h1>
-				<h3>Something went Wrong....!</h3>
-				<small>Exception has Occured....!!!</small><br>
-				<small style="color: red;">1. May be you are trying to add null data which is not valid. <br /> OR <br />2 . Email is already registered..</small>
-				<br />
-				<a href="/services">Back</a>
-				<a href="http://www.google.com" target="_blank">Help</a>
-			</div>
-		</div>
-	</center>
-</body>
+    <div class="error-card">
+        <div class="icon-circle">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
 
+        <h1>No se pudo completar la operación</h1>
+        <p class="subtitle" th:text="${message != null ? message : 'Ocurrió un inconveniente inesperado al procesar tu solicitud en SIPAGO.'}">
+            Ocurrió un inconveniente inesperado al procesar tu solicitud en SIPAGO.
+        </p>
+
+        <div class="reasons-box">
+            <p><i class="fa-solid fa-circle-info me-1"></i> Posibles causas:</p>
+            <ul>
+                <li><i class="fa-solid fa-angle-right"></i> El correo electrónico ingresado ya se encuentra registrado.</li>
+                <li><i class="fa-solid fa-angle-right"></i> Faltan datos obligatorios o el formato es incorrecto.</li>
+                <li><i class="fa-solid fa-angle-right"></i> El registro consultado ya fue eliminado o la sesión expiró.</li>
+            </ul>
+        </div>
+
+        <div class="actions">
+            <button type="button" onclick="history.back()" class="btn-gold">
+                <i class="fa-solid fa-arrow-left"></i> Volver atrás
+            </button>
+            <a th:href="@{/home}" class="btn-outline">
+                <i class="fa-solid fa-house"></i> Ir al Inicio
+            </a>
+        </div>
+    </div>
+</body>
 </html>
