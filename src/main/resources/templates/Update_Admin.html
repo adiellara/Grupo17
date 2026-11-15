@@ -1,27 +1,118 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8" />
-	<title>Document</title>
-	<link rel="stylesheet" href="" th:href="@{/css/Update_Admin.css}" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editar Personal Operativo - SIPAGO</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Update_Admin.css}" />
 </head>
-<body>
-		<a href="/admin/services">Back to Services</a>
-	<div class="updateAdmin">
-				<h3 style="color: red;">UPDATE EXISTING ADMIN / PARTNER DETAILS</h3>
-		<form action="" th:action="@{'/updatingAdmin/'+${admin.adminId}}" th:object="${admin}">
-			Admin_Id :
-			<input type="hidden" name="adminId" th:value="${admin.adminId}" th:text="${admin.adminId}"/><br />
-			Admin_Name :
-			<input type="text"  name="adminName"    th:value="${admin.adminName}"/><br />
-			Admin_Number :
-			<input type="tel"  name="adminNumber" th:value="${admin.adminNumber}" pattern="[0-9]{10}"/> <br />
-			Admin_Email :
-			<input type="email" name="adminEmail" th:value="${admin.adminEmail}" /> <br />
-			
-			<button type="submit">Update_Admin</button>
-			
-		</form>
-	</div>
+
+<body th:with="rolActual=${(session.rolOperativo != null and !#strings.isEmpty(session.rolOperativo)) ? #strings.toUpperCase(#strings.trim(session.rolOperativo)) : 'ADMIN'},
+               rolEditado=${(admin.rol != null and !#strings.isEmpty(admin.rol)) ? #strings.toUpperCase(#strings.trim(admin.rol)) : 'ADMIN'}">
+
+    <div class="top-bar">
+        <a th:href="@{/admin/services}" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i> Volver al Panel
+        </a>
+    </div>
+
+    <div class="form-card">
+        <div class="card-header">
+            <div class="icon-badge">
+                <i class="fa-solid fa-user-pen"></i>
+            </div>
+            <h2>Editar Personal Operativo</h2>
+            <p>Actualiza los datos y permisos de acceso del colaborador</p>
+            <span class="id-pill" th:text="'ID Operador #' + ${admin.adminId}">ID #1</span>
+        </div>
+
+        <form th:action="@{'/updatingAdmin/' + ${admin.adminId}}" th:object="${admin}" method="post">
+            <input type="hidden" name="adminId" th:value="${admin.adminId}" />
+
+            <div class="form-group">
+                <label for="adminName">Nombre completo</label>
+                <div class="input-wrapper">
+                    <i class="fa-regular fa-user field-icon"></i>
+                    <input type="text" id="adminName" name="adminName" class="form-control"
+                           th:value="${admin.adminName}" minlength="3" required />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="adminEmail">Correo corporativo</label>
+                <div class="input-wrapper">
+                    <i class="fa-regular fa-envelope field-icon"></i>
+                    <input type="email" id="adminEmail" name="adminEmail" class="form-control"
+                           th:value="${admin.adminEmail}" required />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="adminNumber">Teléfono de contacto</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-phone field-icon"></i>
+                    <input type="tel" id="adminNumber" name="adminNumber" class="form-control"
+                           th:value="${admin.adminNumber}" pattern="[0-9]{8,15}" required />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="rol">Rol Operativo</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-id-badge field-icon"></i>
+                    <select id="rol" name="rol" class="form-control" required>
+                        <option value="ADMIN" th:if="${rolActual == 'ADMIN'}" th:selected="${rolEditado == 'ADMIN'}">
+                            ADMIN — Super Root (Control total del sistema)
+                        </option>
+                        <option value="GERENTE" th:if="${rolActual == 'ADMIN'}" th:selected="${rolEditado == 'GERENTE'}">
+                            GERENTE — Gestión de personal operativo, productos y órdenes
+                        </option>
+                        <option value="CAJERO" th:selected="${rolEditado == 'CAJERO'}">
+                            CAJERO — Cobros en efectivo/tarjeta y emisión de tickets
+                        </option>
+                        <option value="COCINERO" th:selected="${rolEditado == 'COCINERO'}">
+                            COCINERO — Preparación en cocina (Ingresada → Preparando → Entregada)
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="adminPassword">Nueva contraseña (opcional)</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock field-icon"></i>
+                    <input type="password" id="adminPassword" name="adminPassword" class="form-control"
+                           placeholder="Dejar vacío para conservar la contraseña actual" minlength="4" />
+                    <button type="button" class="toggle-pass" onclick="togglePass()" title="Mostrar/Ocultar">
+                        <i id="eyeIcon" class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="actions-row">
+                <a th:href="@{/admin/services}" class="btn-cancel">Cancelar</a>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-floppy-disk"></i> Actualizar Datos
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function togglePass() {
+            const input = document.getElementById('adminPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>

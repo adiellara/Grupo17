@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nueva Orden en Caja - SIPAGO</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Add_Order.css}" />
+</head>
+
+<body th:with="rol=${(session.rolOperativo != null and !#strings.isEmpty(session.rolOperativo)) ? #strings.toUpperCase(#strings.trim(session.rolOperativo)) : 'ADMIN'}">
+
+    <div class="top-bar">
+        <a th:href="@{/admin/services}" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i> Volver al Panel Operativo
+        </a>
+        <span class="role-pill">
+            <i class="fa-solid fa-cash-register"></i> Terminal POS • <strong th:text="${rol}">CAJERO</strong>
+        </span>
+    </div>
+
+    <div class="order-card">
+        <div class="card-header">
+            <div class="icon-badge">
+                <i class="fa-solid fa-cart-plus"></i>
+            </div>
+            <div>
+                <h2>Registrar Nueva Orden en Caja</h2>
+                <p>Selecciona el cliente, el producto del menú y el flujo de cobro o cocina</p>
+            </div>
+        </div>
+
+        <form id="orderForm" th:action="@{/admin/crearOrdenCaja}" method="post" onsubmit="logEnvioFormulario(event)">
+            <div class="form-grid">
+                <!-- Selección de Cliente -->
+                <div class="form-group full-width">
+                    <label for="userId">Cliente Registrado (Opcional)</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user field-icon"></i>
+                        <select id="userId" name="userId" class="form-control" onchange="toggleNombreMostrador()">
+                            <option value="0">-- Cliente Mostrador / Venta Rápida --</option>
+                            <option th:each="u : ${users}"
+                                    th:if="${u.activo}"
+                                    th:value="${u.u_id}"
+                                    th:text="${u.uname + ' • ' + u.uemail}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Nombre libre para el ticket cuando es venta rápida -->
+                <div class="form-group full-width" id="grupoNombreMostrador">
+                    <label for="nombreCliente">Nombre del Cliente para el Ticket</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-signature field-icon"></i>
+                        <input type="text" id="nombreCliente" name="nombreCliente" class="form-control"
+                               placeholder="Ej. Carlos Mendoza (si se deja vacío dirá 'Mostrador')" />
+                    </div>
+                </div>
+
+                <!-- Selección de Producto -->
+                <div class="form-group full-width">
+                    <label for="productId">Producto del Catálogo</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-utensils field-icon"></i>
+                        <select id="productId" name="productId" class="form-control" required onchange="calcularResumen()">
+                            <option th:each="p : ${products}"
+                                    th:value="${p.pid}"
+                                    th:data-price="${p.pprice}"
+                                    th:data-name="${p.pname}"
+                                    th:text="${p.pname + ' — $' + #numbers.formatDecimal(p.pprice, 1, 2)}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cantidad con botones rápidos -->
+                <div class="form-group">
+                    <label for="cantidad">Cantidad</label>
+                    <div class="qty-control">
+                        <button type="button" class="qty-btn" onclick="cambiarCantidad(-1)">−</button>
+                        <input type="number" id="cantidad" name="cantidad" class="qty-input"
+                               value="1" min="1" max="99" required oninput="calcularResumen()">
+                        <button type="button" class="qty-btn" onclick="cambiarCantidad(1)">+</button>
+                    </div>
+                </div>
+
+                <!-- Estado inicial de cocina -->
+                <div class="form-group">
+                    <label for="estadoOrden">Estado Inicial en Cocina</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-fire-burner field-icon"></i>
+                        <select id="estadoOrden" name="estadoOrden" class="form-control">
+                            <option value="INGRESADA" selected>INGRESADA (En cola)</option>
+                            <option value="PREPARANDO">PREPARANDO (Prioridad inmediata)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Resumen de cálculo en tiempo real -->
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span>Producto seleccionado:</span>
+                        <strong id="resumenProducto">—</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Precio unitario:</span>
+                        <span id="resumenPrecio">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Cantidad:</span>
+                        <span id="resumenCantidad">1</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>TOTAL A PAGAR:</span>
+                        <span id="resumenTotal">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-row">
+                <a th:href="@{/admin/services}" class="btn-cancel">Cancelar</a>
+
+                <button type="submit" name="accion" value="COCINA" class="btn-kitchen" onclick="window.ultimaAccion='COCINA'">
+                    <i class="fa-solid fa-kitchen-set"></i> Enviar a Cocina (Pendiente)
+                </button>
+
+                <button type="submit" name="accion" value="COBRAR" class="btn-pay" onclick="window.ultimaAccion='COBRAR'">
+                    <i class="fa-solid fa-cash-register"></i> Registrar e Ir a Cobrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        window.ultimaAccion = 'COBRAR';
+
+        function toggleNombreMostrador() {
+            const userId = document.getElementById('userId').value;
+            const grupo = document.getElementById('grupoNombreMostrador');
+            grupo.style.display = (userId === '0') ? 'block' : 'none';
+            console.log('[SIPAGO POS] Cambio de cliente -> userId:', userId);
+        }
+
+        function cambiarCantidad(delta) {
+            const input = document.getElementById('cantidad');
+            let val = parseInt(input.value || '1', 10) + delta;
+            if (val < 1) val = 1;
+            if (val > 99) val = 99;
+            input.value = val;
+            calcularResumen();
+        }
+
+        function calcularResumen() {
+            const select = document.getElementById('productId');
+            const qty = parseInt(document.getElementById('cantidad').value || '1', 10);
+
+            if (!select || select.options.length === 0) {
+                console.warn('[SIPAGO POS] No hay productos cargados en el catálogo.');
+                return;
+            }
+
+            const option = select.options[select.selectedIndex];
+            const precio = parseFloat(option.getAttribute('data-price') || '0');
+            const nombre = option.getAttribute('data-name') || option.text;
+            const total = precio * (qty > 0 ? qty : 1);
+
+            document.getElementById('resumenProducto').textContent = nombre;
+            document.getElementById('resumenPrecio').textContent = '$' + precio.toFixed(2);
+            document.getElementById('resumenCantidad').textContent = qty;
+            document.getElementById('resumenTotal').textContent = '$' + total.toFixed(2);
+
+            console.log('[SIPAGO POS] Resumen actualizado:', { productoId: select.value, nombre, precio, qty, total });
+        }
+
+        function logEnvioFormulario(event) {
+            const datos = {
+                userId: document.getElementById('userId').value,
+                nombreCliente: document.getElementById('nombreCliente').value,
+                productId: document.getElementById('productId').value,
+                cantidad: document.getElementById('cantidad').value,
+                estadoOrden: document.getElementById('estadoOrden').value,
+                accion: window.ultimaAccion
+            };
+            console.log('[SIPAGO POS] Enviando POST /admin/crearOrdenCaja con:', datos);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[SIPAGO POS] Add_Order.html cargado correctamente.');
+            toggleNombreMostrador();
+            calcularResumen();
+        });
+    </script>
+</body>
+</html>

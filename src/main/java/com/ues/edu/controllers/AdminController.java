@@ -89,7 +89,7 @@ public class AdminController {
 
     // === BÚSQUEDA DE PRODUCTO Y ORDEN PARA CLIENTE LOGUEADO ===
     @PostMapping("/product/search")
-    public String seachHandler(@RequestParam("productName") String name,
+public String seachHandler(@RequestParam(value = "productName", required = false) String name,
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
@@ -103,14 +103,18 @@ public class AdminController {
         model.addAttribute("name", usuarioSesion.getUname());
         model.addAttribute("orders", orders);
 
-        Product product = this.productServices.getProductByName(name != null ? name.trim() : "");
-        if (product == null) {
+        String termino = (name != null) ? name.trim() : "";
+        List<Product> resultados = this.productServices.searchProductsByName(termino);
+
+        if (resultados == null || resultados.isEmpty()) {
             model.addAttribute("message", "Lo sentimos, el producto solicitado no está disponible.");
             model.addAttribute("product", null);
+            model.addAttribute("products", null);
             return "BuyProduct";
         }
 
-        model.addAttribute("product", product);
+        model.addAttribute("products", resultados);
+        model.addAttribute("product", resultados.get(0));
         return "BuyProduct";
     }
 
@@ -150,6 +154,14 @@ public class AdminController {
         return "BuyProduct";
     }
 
+// === AUXILIAR DE JERARQUÍA RBAC ===
+    private String getRolSesion(HttpSession session) {
+        Object rol = session.getAttribute("rolOperativo");
+        return (rol != null && !rol.toString().trim().isEmpty())
+                ? rol.toString().trim().toUpperCase()
+                : "ADMIN";
+    }
+
     // === PANEL ADMINISTRATIVO PROTEGIDO ===
     @GetMapping("/admin/services")
     public String returnBack(Model model, HttpSession session, HttpServletResponse response) {
@@ -158,7 +170,6 @@ public class AdminController {
             return "redirect:/admin";
         }
 
-        // Respaldo y normalización del rol en sesión
         Object obj = session.getAttribute("adminLogueado");
         Object rolSesion = session.getAttribute("rolOperativo");
         if (rolSesion == null || rolSesion.toString().trim().isEmpty()) {
@@ -176,10 +187,15 @@ public class AdminController {
     }
 
     @GetMapping("/addAdmin")
-    public String addAdminPage(HttpSession session, HttpServletResponse response) {
+    public String addAdminPage(HttpSession session, HttpServletResponse response, RedirectAttributes redirectAttributes) {
         applyNoCacheHeaders(response);
         if (!isAdminAuthenticated(session)) {
             return "redirect:/admin";
+        }
+        String rolSesion = getRolSesion(session);
+        if (!("ADMIN".equals(rolSesion) || "GERENTE".equals(rolSesion))) {
+            redirectAttributes.addFlashAttribute("error", "⛔ No tienes permisos para registrar personal.");
+            return "redirect:/admin/services";
         }
         return "Add_Admin";
     }
@@ -189,44 +205,132 @@ public class AdminController {
         if (!isAdminAuthenticated(session)) {
             return "redirect:/admin";
         }
+        String rolSesion = getRolSesion(session);
+        String rolNuevo = admin.getRol() != null ? admin.getRol().trim().toUpperCase() : "ADMIN";
+
+        if (!("ADMIN".equals(rolSesion) || "GERENTE".equals(rolSesion))) {
+            redirectAttributes.addFlashAttribute("error", "⛔ Acceso denegado.");
+            return "redirect:/admin/services";
+        }
+
+        // Jerarquía: GERENTE solo puede crear CAJERO o COCINERO
+        if ("GERENTE".equals(rolSesion) && !("CAJERO".equals(rolNuevo) || "COCINERO".equals(rolNuevo))) {
+            redirectAttributes.addFlashAttribute("error", "⛔ Un Gerente solo puede registrar Cajeros o Cocineros.");
+            return "redirect:/admin/services";
+        }
+
         try {
             if (adminServices.getAdminByEmail(admin.getAdminEmail()) != null) {
-                redirectAttributes.addFlashAttribute("error", "Ya existe un administrador con ese correo.");
+                redirectAttributes.addFlashAttribute("error", "Ya existe un usuario operativo con ese correo.");
                 return "redirect:/admin/services";
             }
+            admin.setRol(rolNuevo);
             this.adminServices.addAdmin(admin);
+            redirectAttributes.addFlashAttribute("success", "✅ Usuario operativo (" + rolNuevo + ") registrado.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al registrar administrador.");
+            redirectAttributes.addFlashAttribute("error", "Error al registrar usuario operativo.");
         }
         return "redirect:/admin/services";
     }
 
     @GetMapping("/updateAdmin/{adminId}")
-    public String update(@PathVariable("adminId") int id, Model model, HttpSession session, HttpServletResponse response) {
+    public String update(@PathVariable("adminId") int id, Model model, HttpSession session,
+                         HttpServletResponse response, RedirectAttributes redirectAttributes) {
         applyNoCacheHeaders(response);
         if (!isAdminAuthenticated(session)) {
             return "redirect:/admin";
         }
+        String rolSesion = getRolSesion(session);
         Admin admin = this.adminServices.getAdmin(id);
+        if (admin == null) {
+            return "redirect:/admin/services";
+        }
+
+        String rolObjetivo = (admin.getRol() != null && !admin.getRol().trim().isEmpty())
+                ? admin.getRol().trim().toUpperCase() : "ADMIN";
+
+        // Jerarquía: GERENTE solo puede editar CAJERO o COCINERO
+        if (!"ADMIN".equals(rolSesion) && !("GERENTE".equals(rolSesion) && ("CAJERO".equals(rolObjetivo) || "COCINERO".equals(rolObjetivo)))) {
+            redirectAttributes.addFlashAttribute("error", "⛔ No tienes permisos para editar esta cuenta.");
+            return "redirect:/admin/services";
+        }
+
         model.addAttribute("admin", admin);
         return "Update_Admin";
     }
 
-    @GetMapping("/updatingAdmin/{id}")
-    public String updateAdmin(@ModelAttribute Admin admin, @PathVariable("id") int id, HttpSession session) {
+    @PostMapping("/updatingAdmin/{id}")
+    public String updateAdmin(@ModelAttribute Admin admin, @PathVariable("id") int id,
+                              HttpSession session, RedirectAttributes redirectAttributes) {
         if (!isAdminAuthenticated(session)) {
             return "redirect:/admin";
         }
+        String rolSesion = getRolSesion(session);
+        Admin existente = this.adminServices.getAdmin(id);
+        if (existente == null) {
+            return "redirect:/admin/services";
+        }
+
+        String rolActualObjetivo = (existente.getRol() != null && !existente.getRol().trim().isEmpty())
+                ? existente.getRol().trim().toUpperCase() : "ADMIN";
+        String rolNuevo = (admin.getRol() != null && !admin.getRol().trim().isEmpty())
+                ? admin.getRol().trim().toUpperCase() : rolActualObjetivo;
+
+        // Validar jerarquía tanto sobre la cuenta destino como sobre el rol asignado
+        if ("GERENTE".equals(rolSesion)) {
+            boolean objetivoPermitido = "CAJERO".equals(rolActualObjetivo) || "COCINERO".equals(rolActualObjetivo);
+            boolean nuevoRolPermitido = "CAJERO".equals(rolNuevo) || "COCINERO".equals(rolNuevo);
+            if (!objetivoPermitido || !nuevoRolPermitido) {
+                redirectAttributes.addFlashAttribute("error", "Un Gerente solo puede administrar Cajeros o Cocineros.");
+                return "redirect:/admin/services";
+            }
+        } else if (!"ADMIN".equals(rolSesion)) {
+            redirectAttributes.addFlashAttribute("error", "⛔ Acceso denegado.");
+            return "redirect:/admin/services";
+        }
+
+        admin.setRol(rolNuevo);
         this.adminServices.update(admin, id);
+
+        // Si el usuario editó su propia cuenta, refrescar datos en sesión
+        Object logueado = session.getAttribute("adminLogueado");
+        if (logueado instanceof Admin && ((Admin) logueado).getAdminId() == id) {
+            Admin actualizado = this.adminServices.getAdmin(id);
+            session.setAttribute("adminLogueado", actualizado);
+            session.setAttribute("rolOperativo", actualizado.getRol());
+        }
+
+        redirectAttributes.addFlashAttribute("success", "✅ Datos de operador actualizados correctamente.");
         return "redirect:/admin/services";
     }
 
     @GetMapping("/deleteAdmin/{id}")
-    public String deleteAdmin(@PathVariable("id") int id, HttpSession session) {
+    public String deleteAdmin(@PathVariable("id") int id, HttpSession session, RedirectAttributes redirectAttributes) {
         if (!isAdminAuthenticated(session)) {
             return "redirect:/admin";
         }
-        this.adminServices.delete(id);
+        String rolSesion = getRolSesion(session);
+        Admin objetivo = this.adminServices.getAdmin(id);
+        if (objetivo == null) {
+            return "redirect:/admin/services";
+        }
+
+        // Evitar que el operador elimine su propia sesión activa
+        Object logueado = session.getAttribute("adminLogueado");
+        if (logueado instanceof Admin && ((Admin) logueado).getAdminId() == id) {
+            redirectAttributes.addFlashAttribute("error", "⚠️ No puedes eliminar tu propia cuenta mientras tienes sesión activa.");
+            return "redirect:/admin/services";
+        }
+
+        String rolObjetivo = (objetivo.getRol() != null && !objetivo.getRol().trim().isEmpty())
+                ? objetivo.getRol().trim().toUpperCase() : "ADMIN";
+
+        if ("ADMIN".equals(rolSesion) || ("GERENTE".equals(rolSesion) && ("CAJERO".equals(rolObjetivo) || "COCINERO".equals(rolObjetivo)))) {
+            this.adminServices.delete(id);
+            redirectAttributes.addFlashAttribute("success", "🗑️ Operador eliminado del sistema.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "⛔ No tienes permisos para eliminar esta cuenta.");
+        }
         return "redirect:/admin/services";
     }
 
@@ -317,30 +421,112 @@ public class AdminController {
         redirectAttributes.addFlashAttribute("success", "Orden eliminada correctamente.");
         return "redirect:/admin/services";
     }
-
-    @PostMapping("/admin/crearOrdenCaja")
-    public String crearOrdenDesdeCaja(@RequestParam("userId") int userId,
-            @RequestParam("productId") int productId,
-            @RequestParam("cantidad") int cantidad,
-            HttpSession session) {
-        if (session.getAttribute("adminLogueado") == null) {
+    
+    @GetMapping("/addOrder")
+    public String addOrderPage(Model model, HttpSession session, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        applyNoCacheHeaders(response);
+        if (!isAdminAuthenticated(session)) {
             return "redirect:/admin";
         }
-        User cliente = services.getUser(userId);
-        Product prod = productServices.getProduct(productId);
-        if (cliente != null && prod != null && cantidad > 0) {
+        String rolSesion = getRolSesion(session);
+        if (!("ADMIN".equals(rolSesion) || "CAJERO".equals(rolSesion))) {
+            redirectAttributes.addFlashAttribute("error", "⛔ Solo Cajero o Administrador pueden ingresar órdenes en caja.");
+            return "redirect:/admin/services";
+        }
+        model.addAttribute("users", this.services.getAllUser());
+        model.addAttribute("products", this.productServices.getAllProducts());
+        return "Add_Order";
+    }
+
+    @PostMapping("/admin/crearOrdenCaja")
+public String crearOrdenDesdeCaja(@RequestParam(value = "userId", defaultValue = "0") int userId,
+            @RequestParam(value = "nombreCliente", required = false) String nombreCliente,
+            @RequestParam("productId") int productId,
+            @RequestParam("cantidad") int cantidad,
+            @RequestParam(value = "estadoOrden", defaultValue = "INGRESADA") String estadoOrden,
+            @RequestParam(value = "accion", defaultValue = "COBRAR") String accion,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        System.out.println("==========================================");
+        System.out.println("[SIPAGO POS] POST /admin/crearOrdenCaja recibido:");
+        System.out.println(" -> userId: " + userId);
+        System.out.println(" -> nombreCliente: " + nombreCliente);
+        System.out.println(" -> productId: " + productId);
+        System.out.println(" -> cantidad: " + cantidad);
+        System.out.println(" -> estadoOrden: " + estadoOrden);
+        System.out.println(" -> accion: " + accion);
+
+        if (!isAdminAuthenticated(session)) {
+            System.out.println("[SIPAGO POS] Sesión no autenticada -> redirigiendo a /admin");
+            return "redirect:/admin";
+        }
+
+        try {
+            Product prod = productServices.getProduct(productId);
+            System.out.println("[SIPAGO POS] Producto encontrado: " + (prod != null ? prod.getPname() + " ($" + prod.getPprice() + ")" : "NULL"));
+
+            if (prod == null || cantidad <= 0) {
+                System.out.println("[SIPAGO POS] Producto inválido o cantidad <= 0");
+                redirectAttributes.addFlashAttribute("error", "⚠️ Selecciona un producto y cantidad válidos.");
+                return "redirect:/addOrder";
+            }
+
+            User cliente = null;
+            if (userId > 0) {
+                cliente = services.getUser(userId);
+                System.out.println("[SIPAGO POS] Cliente registrado seleccionado: " + (cliente != null ? cliente.getUname() : "NULL"));
+            } else {
+                // Busca o crea un cliente técnico 'Mostrador' para cumplir con user_u_id en MySQL
+                cliente = services.getUserByEmail("mostrador@sipago.local");
+                if (cliente == null) {
+                    System.out.println("[SIPAGO POS] Creando registro técnico 'Cliente Mostrador' en BD...");
+                    User mostrador = new User();
+                    mostrador.setUname("Cliente Mostrador");
+                    mostrador.setUemail("mostrador@sipago.local");
+                    mostrador.setUpassword("MOSTRADOR_INTERNO");
+                    mostrador.setUnumber("70000000");
+                    mostrador.setActivo(true);
+                    services.addUser(mostrador);
+                    cliente = services.getUserByEmail("mostrador@sipago.local");
+                }
+                System.out.println("[SIPAGO POS] Usando cliente técnico ID: " + (cliente != null ? cliente.getU_id() : "NULL"));
+            }
+
+            String etiquetaCliente = (nombreCliente != null && !nombreCliente.trim().isEmpty())
+                    ? nombreCliente.trim()
+                    : (cliente != null ? cliente.getUname() : "Mostrador");
+
             Orders orden = new Orders();
             orden.setUser(cliente);
+            orden.setNombreCliente(etiquetaCliente);
             orden.setoName(prod.getPname());
             orden.setoPrice(prod.getPprice());
             orden.setoQuantity(cantidad);
             orden.setTotalAmmout(Math.round((prod.getPprice() * cantidad) * 100.0) / 100.0);
-            orden.setEstadoOrden("INGRESADA");
+            orden.setOrderDate(new Date());
+            orden.setActivo(true);
+            orden.setEstadoOrden(estadoOrden);
             orden.setEstadoPago("PENDIENTE");
+
             orderServices.saveOrder(orden);
+            System.out.println("[SIPAGO POS] ✅ Orden guardada en MySQL con oId = " + orden.getoId());
+
+            if ("COCINA".equalsIgnoreCase(accion)) {
+                System.out.println("[SIPAGO POS] Redirigiendo a /admin/services (Modo Cocina)");
+                redirectAttributes.addFlashAttribute("success", "✅ Orden #" + orden.getoId() + " (" + etiquetaCliente + ") enviada a cocina.");
+                return "redirect:/admin/services";
+            }
+
+            System.out.println("[SIPAGO POS] Redirigiendo a /pago/" + orden.getoId());
             return "redirect:/pago/" + orden.getoId();
+
+        } catch (Exception e) {
+            System.out.println("[SIPAGO POS] ❌ EXCEPCIÓN al crear orden: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "❌ Error al registrar la orden: " + e.getMessage());
+            return "redirect:/addOrder";
         }
-        return "redirect:/admin/services";
     }
 
 }

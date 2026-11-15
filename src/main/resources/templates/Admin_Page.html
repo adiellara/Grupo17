@@ -4,12 +4,13 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Acceso Operativo - SIPAGO</title>
+        <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" th:href="@{/css/Admin_Page.css}" />
     </head>
 
-   <body th:with="rol=${(session.rolOperativo != null and !#strings.isEmpty(session.rolOperativo)) ? #strings.toUpperCase(#strings.trim(session.rolOperativo)) : 'ADMIN'}">
+    <body th:with="rol=${(session.rolOperativo != null and !#strings.isEmpty(session.rolOperativo)) ? #strings.toUpperCase(#strings.trim(session.rolOperativo)) : 'ADMIN'}">
         <!-- BARRA DE NAVEGACIÓN Y SEGURIDAD SUPERIOR -->
         <header class="admin-navbar">
             <div class="nav-brand">
@@ -22,22 +23,24 @@
 
             <div class="nav-user-info">
                 <div class="user-pill">
-                    <div class="user-pill">
-                        <i class="fa-solid fa-user-shield"></i>
-                        <span th:text="${session.adminLogueado != null ? session.adminLogueado.adminName : 'Operador'}">Operador</span>
-                    </div>
-                    <a th:href="@{/admin/logout}" class="logout-btn">
-                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
-                    </a>
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span th:text="${session.adminLogueado != null ? session.adminLogueado.adminName : 'Operador'}">Operador</span>
                 </div>
+                <a th:href="@{/admin/logout}" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+                </a>
             </div>
         </header>
 
         <main class="admin-container">
+            <!-- Alertas globales de operación -->
+            <div th:if="${success}" style="background:#14532d; color:#bbf7d0; padding:12px 18px; border-radius:10px; margin-bottom:16px; border:1px solid #22c55e;" th:text="${success}"></div>
+            <div th:if="${error}" style="background:#7f1d1d; color:#fecaca; padding:12px 18px; border-radius:10px; margin-bottom:16px; border:1px solid #ef4444;" th:text="${error}"></div>
+
             <!-- MENÚ DE PESTAÑAS FILTRADO POR ROL OPERATIVO -->
             <nav class="tabs-bar" role="tablist">
                 <button type="button" class="tab-btn active" data-tab="tab-admins"
-                        th:if="${rol == 'ADMIN'}"
+                        th:if="${rol == 'ADMIN' or rol == 'GERENTE'}"
                         onclick="switchTab('tab-admins', this)">
                     <i class="fa-solid fa-user-tie"></i> Personal Operativo
                     <span class="tab-count" th:text="${#lists.size(admins)}">0</span>
@@ -71,15 +74,18 @@
                 </button>
             </nav>
 
-            <!-- PESTAÑA 1: PERSONAL OPERATIVO (SOLO ADMIN) -->
-            <section id="tab-admins" class="tab-panel active" th:if="${rol == 'ADMIN'}">
+            <!-- PESTAÑA 1: PERSONAL OPERATIVO (ADMIN: TODO | GERENTE: SOLO CAJERO Y COCINERO) -->
+            <section id="tab-admins" class="tab-panel active" th:if="${rol == 'ADMIN' or rol == 'GERENTE'}">
                 <div class="panel-header">
                     <div>
                         <h2>Gestión de Personal Operativo</h2>
-                        <p class="panel-subtitle">Control de cuentas internas: Administrador, Gerente, Cajero y Cocinero.</p>
+                        <p class="panel-subtitle" th:text="${rol == 'ADMIN' ? 'Control total de cuentas: Administrador, Gerente, Cajero y Cocinero.' : 'Registro y gestión de personal de Caja y Cocina.'}">
+                            Control de cuentas internas.
+                        </p>
                     </div>
                     <a class="btns btn-primary" th:href="@{/addAdmin}">
-                        <i class="fa-solid fa-user-plus"></i> Nuevo Operador
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span th:text="${rol == 'ADMIN' ? 'Nuevo Operador' : 'Nuevo Cajero / Cocinero'}">Nuevo Operador</span>
                     </a>
                 </div>
 
@@ -96,22 +102,29 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="admin : ${admins}">
+                            <tr th:each="admin : ${admins}"
+                                th:with="itemRol=${admin.rol != null and !#strings.isEmpty(admin.rol) ? #strings.toUpperCase(#strings.trim(admin.rol)) : 'ADMIN'}">
                                 <td th:text="${admin.adminId}"></td>
                                 <td><strong th:text="${admin.adminName}"></strong></td>
                                 <td th:text="${admin.adminEmail}"></td>
-                                <td><span class="status-active" th:text="${admin.rol != null ? admin.rol : 'ADMIN'}">ADMIN</span></td>
+                                <td><span class="status-active" th:text="${itemRol}">ADMIN</span></td>
                                 <td th:text="${admin.adminNumber}"></td>
                                 <td class="actions-cell">
-                                    <a th:href="@{'/updateAdmin/' + ${admin.adminId}}" class="action edit" title="Editar">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <a href="javascript:void(0);"
-                                       th:data-id="${admin.adminId}"
-                                       onclick="customConfirm('¿Deseas eliminar este operador?', () => window.location.href = '/deleteAdmin/' + this.getAttribute('data-id'));"
-                                       class="action delete" title="Eliminar">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>
+                                    <th:block th:if="${rol == 'ADMIN' or (rol == 'GERENTE' and (itemRol == 'CAJERO' or itemRol == 'COCINERO'))}">
+                                        <a th:href="@{'/updateAdmin/' + ${admin.adminId}}" class="action edit" title="Editar">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                        <a href="javascript:void(0);"
+                                           th:data-id="${admin.adminId}"
+                                           onclick="customConfirm('¿Deseas eliminar este operador?', () => window.location.href = '/deleteAdmin/' + this.getAttribute('data-id'));"
+                                           class="action delete" title="Eliminar">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </a>
+                                    </th:block>
+                                    <span th:unless="${rol == 'ADMIN' or (rol == 'GERENTE' and (itemRol == 'CAJERO' or itemRol == 'COCINERO'))}"
+                                          style="color:#9ca3af; font-size:0.8rem;">
+                                        <i class="fa-solid fa-lock"></i> Protegido
+                                    </span>
                                 </td>
                             </tr>
                         </tbody>
@@ -221,7 +234,7 @@
                             <tr th:each="product : ${products}">
                                 <td th:text="${product.pid}"></td>
                                 <td><strong th:text="${product.pname}"></strong></td>
-                                <td th:text="'$' + ${product.pprice}"></td>
+                                <td th:text="'$' + ${#numbers.formatDecimal(product.pprice, 1, 2)}"></td>
                                 <td class="actions-cell">
                                     <a th:href="@{'/updateProduct/' + ${product.pid}}" class="action edit" title="Editar">
                                         <i class="fa-solid fa-pen"></i>
@@ -248,19 +261,15 @@
                         <p class="panel-subtitle">Cobro en efectivo/tarjeta, emisión de tickets y flujo de cocina (Ingresada → Preparando → Entregada).</p>
                     </div>
                     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <!-- Cajero o Admin pueden ingresar una orden nueva en mostrador -->
-                        <button type="button" class="btns btn-primary"
-                                th:if="${rol == 'ADMIN' or rol == 'CAJERO'}"
-                                onclick="openNewOrderModal()">
+                        <a th:href="@{/addOrder}" class="btns btn-primary"
+                           th:if="${rol == 'ADMIN' or rol == 'CAJERO'}">
                             <i class="fa-solid fa-cart-plus"></i> Nueva Orden (Caja)
-                        </button>
+                        </a>
                         <button type="button" class="btns btn-secondary" onclick="openSearchModal()">
                             <i class="fa-solid fa-magnifying-glass"></i> Buscar por cliente
                         </button>
                     </div>
                 </div>
-
-                <div th:if="${success}" style="background:#14532d; color:#bbf7d0; padding:10px 16px; border-radius:8px; margin-bottom:15px;" th:text="${success}"></div>
 
                 <div class="table-responsive">
                     <table>
@@ -315,21 +324,18 @@
 
                                 <!-- ACCIONES DE CAJA / TICKET / ADMIN -->
                                 <td class="actions-cell">
-                                    <!-- CAJERO O ADMIN: Cobrar si está PENDIENTE -->
                                     <a th:if="${(rol == 'CAJERO' or rol == 'ADMIN') and order.estadoPago != 'PAGADO'}"
                                        th:href="@{'/pago/' + ${order.oId}}"
                                        class="action toggle" style="background:#eab308; color:#111827; font-weight:700;">
                                         <i class="fa-solid fa-cash-register"></i> Cobrar
                                     </a>
 
-                                    <!-- TODOS LOS ROLES OPERATIVOS: Ver Ticket si ya está PAGADO -->
                                     <a th:if="${order.estadoPago == 'PAGADO'}"
                                        th:href="@{'/pago/ticket/' + ${order.oId}}"
                                        class="action edit" title="Ver e imprimir Ticket">
                                         <i class="fa-solid fa-receipt"></i> Ticket
                                     </a>
 
-                                    <!-- SOLO ADMIN: Eliminar orden -->
                                     <a th:if="${rol == 'ADMIN'}" href="javascript:void(0);"
                                        th:data-id="${order.oId}"
                                        onclick="customConfirm('¿Seguro que deseas eliminar esta orden?', () => window.location.href = '/deleteOrder/' + this.getAttribute('data-id'));"
@@ -365,7 +371,7 @@
                         <i class="fa-solid fa-users-gear"></i>
                         <div>
                             <h4>Control Basado en Roles</h4>
-                            <p>Segregación activa para <strong>Administrador, Gerente, Cajero y Cocinero</strong>.</p>
+                            <p>Jerarquía activa: <strong>Admin (Root) → Gerente → Cajero / Cocinero</strong>.</p>
                         </div>
                     </div>
                     <div class="sec-card">
@@ -378,33 +384,6 @@
                 </div>
             </section>
         </main>
-
-        <!-- MODAL NUEVA ORDEN EN CAJA (CAJERO / ADMIN) -->
-        <div id="newOrderModal" class="modal" th:if="${rol == 'ADMIN' or rol == 'CAJERO'}">
-            <div class="modal-content">
-                <span class="close" onclick="closeNewOrderModal()">&times;</span>
-                <h3><i class="fa-solid fa-cart-plus"></i> Ingresar Orden en Caja</h3>
-                <form th:action="@{/admin/crearOrdenCaja}" method="post" style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
-                    <div>
-                        <label>Cliente:</label>
-                        <select name="userId" required style="width:100%; padding:8px; border-radius:6px; background:#12151c; color:#fff; border:1px solid #475569;">
-                            <option th:each="u : ${users}" th:if="${u.activo}" th:value="${u.u_id}" th:text="${u.uname + ' (' + u.uemail + ')'}"></option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Producto:</label>
-                        <select name="productId" required style="width:100%; padding:8px; border-radius:6px; background:#12151c; color:#fff; border:1px solid #475569;">
-                            <option th:each="p : ${products}" th:value="${p.pid}" th:text="${p.pname + ' - $' + p.pprice}"></option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Cantidad:</label>
-                        <input type="number" name="cantidad" value="1" min="1" required style="width:100%; padding:8px; border-radius:6px; background:#12151c; color:#fff; border:1px solid #475569;">
-                    </div>
-                    <button type="submit" class="btns btn-primary">Registrar e Ir a Cobrar</button>
-                </form>
-            </div>
-        </div>
 
         <!-- MODAL DE BÚSQUEDA DE ÓRDENES -->
         <div id="searchModal" class="modal">
@@ -501,8 +480,6 @@
                 });
             }
 
-            function openNewOrderModal() { document.getElementById("newOrderModal").style.display = "flex"; }
-            function closeNewOrderModal() { document.getElementById("newOrderModal").style.display = "none"; }
             function openSearchModal() { document.getElementById("searchModal").style.display = "flex"; }
             function closeSearchModal() {
                 document.getElementById("searchModal").style.display = "none";
@@ -526,7 +503,7 @@
                         data.forEach(order => {
                             tbody.innerHTML += `
                             <tr>
-                                <td>${order.user ? order.user.uname : 'N/A'}</td>
+                                <td>${order.user ? order.user.uname : 'Mostrador'}</td>
                                 <td>${order.oName}</td>
                                 <td>${order.oQuantity}</td>
                                 <td>$${order.totalAmmout}</td>

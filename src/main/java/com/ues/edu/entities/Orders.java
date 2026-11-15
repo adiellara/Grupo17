@@ -17,11 +17,6 @@ import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-/**
- * Entidad de Órdenes / Pedidos del sistema SIPAGO.
- *
- * @author 
- */
 @Entity
 @Table(name = "orders")
 public class Orders {
@@ -48,6 +43,10 @@ public class Orders {
     @Column(nullable = false)
     private boolean activo = true;
 
+    // === NOMBRE OPCIONAL EN TICKET PARA VENTAS DE MOSTRADOR ===
+    @Column(length = 120)
+    private String nombreCliente;
+
     // === CAMPOS DE ESTADO DE COCINA Y PAGO ===
     @Column(nullable = false, length = 30)
     private String estadoOrden = "INGRESADA"; // INGRESADA, PREPARANDO, ENTREGADA
@@ -65,8 +64,8 @@ public class Orders {
 
     private Double cambio;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "user_u_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_u_id", nullable = true)
     @JsonIgnoreProperties({"orders", "upassword"})
     private User user;
 
@@ -142,6 +141,14 @@ public class Orders {
         this.activo = activo;
     }
 
+    public String getNombreCliente() {
+        return nombreCliente;
+    }
+
+    public void setNombreCliente(String nombreCliente) {
+        this.nombreCliente = nombreCliente;
+    }
+
     public String getEstadoOrden() {
         return estadoOrden;
     }
@@ -201,8 +208,9 @@ public class Orders {
     @Override
     public String toString() {
         return "Orders [oId=" + oId + ", oName=" + oName + ", oPrice=" + oPrice + ", oQuantity=" + oQuantity
-                + ", orderDate=" + orderDate + ", totalAmmout=" + totalAmmout + ", activo=" + activo
-                + ", estadoOrden=" + estadoOrden + ", estadoPago=" + estadoPago + ", metodoPago=" + metodoPago
-                + ", codigoTicket=" + codigoTicket + ", userId=" + (user != null ? user.getU_id() : null) + "]";
+                + ", nombreCliente=" + nombreCliente + ", orderDate=" + orderDate + ", totalAmmout=" + totalAmmout
+                + ", activo=" + activo + ", estadoOrden=" + estadoOrden + ", estadoPago=" + estadoPago
+                + ", metodoPago=" + metodoPago + ", codigoTicket=" + codigoTicket
+                + ", userId=" + (user != null ? user.getU_id() : null) + "]";
     }
 }

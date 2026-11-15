@@ -1,34 +1,126 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8" />
-	<title>Admin : Add</title>
-	<link rel="stylesheet" href="" th:href="@{/css/Add_Admin.css}" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrar Personal Operativo - SIPAGO</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Add_Admin.css}" />
 </head>
 
-<body>
-	<a href="/admin/services">Back to Services</a>
-	<div class="addAdmin">
-		<h3 style="color: red;">ADD NEW ADMIN/PARTNER</h3>
-		<form action="" th:action="@{/addingAdmin}" method="post">
-			Admin_Name :
-			<input type="text" name="adminName" placeholder="Enter name..." class="adminName" minlength="2" required>
-			<br />
+<body th:with="rolActual=${(session.rolOperativo != null and !#strings.isEmpty(session.rolOperativo)) ? #strings.toUpperCase(#strings.trim(session.rolOperativo)) : 'ADMIN'}">
 
-			Admin_Email :
-			<input type="email" name="adminEmail" placeholder="Enter email..." class="adminEmail" required><br />
+    <div class="top-bar">
+        <a th:href="@{/admin/services}" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i> Volver al Panel
+        </a>
+    </div>
 
+    <div class="form-card">
+        <div class="card-header">
+            <div class="icon-badge">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h2 th:text="${rolActual == 'ADMIN' ? 'Nuevo Administrador / Gerente / Staff' : 'Nuevo Personal de Caja / Cocina'}">
+                Registrar Personal Operativo
+            </h2>
+            <p>Jerarquía activa: <strong style="color:#10b981;" th:text="${rolActual}">ADMIN</strong></p>
+        </div>
 
-			Admin_Number :
-			<input type="tel" name="adminNumber" placeholder="Enter 10 digit mobile number..." class="adminNumber"
-				pattern="[0-9]{10}" required /><br />
+        <form th:action="@{/addingAdmin}" method="post">
+            <div class="form-group">
+                <label for="adminName">Nombre completo</label>
+                <div class="input-wrapper">
+                    <i class="fa-regular fa-user field-icon"></i>
+                    <input type="text" id="adminName" name="adminName" class="form-control"
+                           placeholder="Ej. María Fernanda López" minlength="3" required>
+                </div>
+            </div>
 
+            <div class="form-group">
+                <label for="adminEmail">Correo corporativo</label>
+                <div class="input-wrapper">
+                    <i class="fa-regular fa-envelope field-icon"></i>
+                    <input type="email" id="adminEmail" name="adminEmail" class="form-control"
+                           placeholder="usuario@sipago.com" required>
+                </div>
+            </div>
 
-			<input type="hidden" name="adminPassword" value="1234" />
-			<button type="submit">Add_Admin</button>
-		</form>
-	</div>
+            <div class="form-group">
+                <label for="adminNumber">Teléfono de contacto</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-phone field-icon"></i>
+                    <input type="tel" id="adminNumber" name="adminNumber" class="form-control"
+                           placeholder="Ej. 71234567" pattern="[0-9]{8,15}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="rol">Rol a asignar</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-id-badge field-icon"></i>
+                    <select id="rol" name="rol" class="form-control" required onchange="actualizarDescripcionRol()">
+                        <!-- Opciones exclusivas para ADMIN (Super Root) -->
+                        <option value="ADMIN" th:if="${rolActual == 'ADMIN'}">ADMIN — Super Root (Control total del sistema)</option>
+                        <option value="GERENTE" th:if="${rolActual == 'ADMIN'}">GERENTE — Gestión de personal operativo, productos y órdenes</option>
+
+                        <!-- Opciones disponibles para ADMIN y GERENTE -->
+                        <option value="CAJERO">CAJERO — Cobros en efectivo/tarjeta y emisión de tickets</option>
+                        <option value="COCINERO">COCINERO — Preparación en cocina (Ingresada → Preparando → Entregada)</option>
+                    </select>
+                </div>
+                <small id="roleHint" class="role-hint"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="adminPassword">Contraseña de acceso</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock field-icon"></i>
+                    <input type="password" id="adminPassword" name="adminPassword" class="form-control"
+                           placeholder="Mínimo 4 caracteres" minlength="4" required>
+                    <button type="button" class="toggle-pass" onclick="togglePass()" title="Mostrar/Ocultar">
+                        <i id="eyeIcon" class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="actions-row">
+                <a th:href="@{/admin/services}" class="btn-cancel">Cancelar</a>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Usuario
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function togglePass() {
+            const input = document.getElementById('adminPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function actualizarDescripcionRol() {
+            const rol = document.getElementById('rol').value;
+            const hint = document.getElementById('roleHint');
+            const descripciones = {
+                'ADMIN': 'Super Root: acceso total, creación de administradores, gerentes y configuración general.',
+                'GERENTE': 'Puede registrar cajeros y cocineros, gestionar productos, clientes y supervisar órdenes.',
+                'CAJERO': 'Permite registrar órdenes en mostrador, procesar cobros e imprimir tickets.',
+                'COCINERO': 'Permite visualizar pedidos activos y actualizar su estado de preparación en cocina.'
+            };
+            hint.textContent = descripciones[rol] || '';
+        }
+
+        document.addEventListener('DOMContentLoaded', actualizarDescripcionRol);
+    </script>
 </body>
-
 </html>

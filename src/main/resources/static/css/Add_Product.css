@@ -1,165 +1,192 @@
-body {
-    background-image: url("https://www.thespruceeats.com/thmb/hqqNrNhIpqPqV2u0T0K-IUzUsEo=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SES-cuisine-of-north-india-1957883-d32a933f506d43f59ac38a8eb956884a.jpg");
-    background-repeat: no-repeat;
-    background-size: cover;
-    display: flex; /* Para centrar el contenido principal */
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* Asegura que ocupe toda la altura de la vista */
+@charset "UTF-8";
+
+* {
     margin: 0;
-    padding: 20px; /* Un poco de padding para que no se pegue a los bordes */
-    background-size: cover; /* Asegura que la imagen de fondo cubra todo */
-    background-position: center; /* Centra la imagen de fondo */
-    font-family: 'Arial', sans-serif; /* Puedes cambiar por una fuente más aesthetic */
-    color: #333; /* Color de texto general */
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
 }
 
-/* Contenedor del formulario para agrupar y centrar */
-.addProducts {
-    background-color: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente para el formulario */
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+body {
+    min-height: 100vh;
+    background: radial-gradient(circle at top right, #182b27, #12151c 65%);
+    color: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.top-bar {
     width: 100%;
-    max-width: 500px; /* Ancho máximo para el formulario */
+    max-width: 520px;
+    margin-bottom: 16px;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(24, 28, 36, 0.9);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    background-color: #10b981;
+    color: #111827;
+}
+
+.form-card {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(24, 28, 36, 0.96);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 18px;
+    padding: 34px 32px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+}
+
+.card-header {
     text-align: center;
+    margin-bottom: 24px;
 }
 
-h3 {
-    font-size: 2.2em; /* Título más grande */
-    color: #4CAF50; /* Un color verde aesthetic */
-    margin-bottom: 30px;
+.icon-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.15);
+    border: 2px solid #10b981;
+    color: #10b981;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
 }
 
-label {
-    display: block; /* Para que cada label ocupe su propia línea */
-    text-align: left;
-    margin-bottom: 10px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #555;
+.card-header h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
 }
 
-input[type="text"],
-textarea {
-    width: calc(100% - 20px); /* Ocupa casi todo el ancho, dejando padding */
-    padding: 15px;
-    margin-bottom: 25px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 1.2em; /* Entradas de texto más grandes */
-    box-sizing: border-box; /* Asegura que padding no aumente el ancho total */
-    transition: border-color 0.3s ease;
-    font-family: 'Arial', sans-serif;
+.card-header p {
+    font-size: 0.85rem;
+    color: #9ca3af;
 }
 
-input[type="text"]:focus,
-textarea:focus {
-    border-color: #4CAF50; /* Borde al enfocar */
-    outline: none; /* Quita el contorno por defecto */
+.form-group {
+    margin-bottom: 16px;
 }
 
-textarea {
-    resize: vertical; /* Permite redimensionar verticalmente */
-    min-height: 100px; /* Altura mínima para el textarea */
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #d1d5db;
+    margin-bottom: 6px;
 }
 
-button, .addProducts button { /* Ajusta el selector si tu botón tiene una clase */
-    background-color: #4CAF50; /* Botón verde */
-    color: white;
-    padding: 15px 30px;
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper i.field-icon {
+    position: absolute;
+    left: 14px;
+    color: #10b981;
+    font-size: 0.95rem;
+    pointer-events: none;
+}
+
+.input-wrapper.textarea-wrapper i.field-icon {
+    top: 14px;
+}
+
+.form-control {
+    width: 100%;
+    background-color: #12151c;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    color: #ffffff;
+    padding: 11px 14px 11px 40px;
+    font-size: 0.93rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+}
+
+.form-control::placeholder {
+    color: #6b7280;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 95px;
+}
+
+.actions-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-submit {
+    flex: 2;
+    background-color: #10b981;
+    color: #111827;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
     cursor: pointer;
-    font-size: 1.3em;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background-color 0.2s, transform 0.15s;
 }
 
-button:hover, .addProducts button:hover {
-    background-color: #45a049; /* Color más oscuro al pasar el ratón */
-    transform: translateY(-2px); /* Pequeño efecto al pasar el ratón */
+.btn-submit:hover {
+    background-color: #059669;
+    color: #ffffff;
+    transform: translateY(-1px);
 }
 
-/* Estilo para el botón de regresar */
-.regresar-btn { 
-    position: absolute; /* **CLAVE:** Lo saca del flujo normal para posicionarlo libremente */
-    top: 20px;          /* Distancia desde el borde superior */
-    left: 20px;         /* Distancia desde el borde izquierdo */
-    
-    /* Estilos visuales para que se vea como en tu primera captura */
-    background-color: #333; /* Fondo más oscuro y sólido */
-    color: white; /* Texto blanco */
-    padding: 8px 15px; /* Relleno */
-    border-radius: 4px; /* Bordes ligeramente redondeados */
-    text-decoration: none; /* Quita el subrayado del enlace */
-    font-size: 1em;
-    font-weight: bold;
-    z-index: 10; /* Asegura que siempre esté por encima del formulario */
-    transition: background-color 0.2s ease;
+.btn-cancel {
+    flex: 1;
+    background-color: transparent;
+    color: #cbd5e1;
+    border: 1px solid #4b5563;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
 }
 
-.regresar-btn:hover {
-    background-color: #555; /* Oscurece un poco al pasar el mouse */
+.btn-cancel:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
 }
-
-/* Si usas la etiqueta <p> para los labels, tendrías que cambiar el selector */
-.addProducts p {
-    text-align: center; /* Alinea los textos "Nombre del producto" a la izquierda */
-    margin-bottom: 5px;
-    font-size: 1.1em;
-    color: #555;
-    font-weight: bold;
-}
-/*body
-{
-	background-image: url("https://www.thespruceeats.com/thmb/hqqNrNhIpqPqV2u0T0K-IUzUsEo=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SES-cuisine-of-north-india-1957883-d32a933f506d43f59ac38a8eb956884a.jpg");
-	background-repeat: no-repeat;
-	background-size: cover;
-}
-*{
-	color: rgb(192, 192, 192);
-	font-weight: bold;
-}
-
-.addProducts{
-	background-color: transparent;
-	width: 400px;
-	height: 400px;
-	position: absolute;
-	left: 400px;
-	top: 30px;
-}
-input,textarea{
-	display: block;
-	padding: 5px;
-	border: none;
-	outline: none;
-	background-color: transparent;
-	border-bottom: 1px darkgreen solid;
-	font-size: 15px;
-	width: 200px;
-	color: aqua;
-	
-}
-button
-{
-	color: rgb(192, 192, 192);
-	background-color: green;
-	border: 1px black solid;
-	padding: 9px;
-	cursor: pointer;
-	position: relative;
-	left: 45px;
-	font-weight: bold;
-}
-a{
-	position: relative;
-	top: 20px;
-	border: 1px solid darkslategray;
-	padding: 10px;
-	background-color: darkslategray;
-	text-decoration: none;
-	
-}*/

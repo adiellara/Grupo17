@@ -58,8 +58,10 @@ public class ProductServices {
         return null;
 
     }
-    public List<Product> searchProductsByName(String name) {
-        // Llama al nuevo método que creamos en el repositorio
-        return this.productRepository.findByPnameContainingIgnoreCase(name);
+   public List<Product> searchProductsByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return (List<Product>) this.productRepository.findAll();
+        }
+        return this.productRepository.findByPnameContainingIgnoreCase(name.trim());
     }
 }

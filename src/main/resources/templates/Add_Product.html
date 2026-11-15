@@ -1,24 +1,65 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8" />
-	<title>Añadir producto nuevo</title>
-	<link rel="stylesheet" href="" th:href="@{/css/Add_Product.css}" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nuevo Producto - SIPAGO</title>
+    <link rel="icon" type="image/png" th:href="@{/Images/logo.png}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Add_Product.css}" />
 </head>
 <body>
-    <a href="/admin/products" class="regresar-btn">Regresar</a>
-    <div class="addProducts"> <h3 style="font-weight: bolder;color: seagreen;">Añadir un nuevo producto:</h3>
-        
-        <form action="" th:action="@{/addingProduct}" method="post">
-            Nombre del producto:
-            <input type="text" name="pname" value="" placeholder="" /> <br />
-            Precio del producto:
-            <input type="text" name="pprice" placeholder="" /><br />
-            Descripción del producto: <br />
-            <textarea name="pdescription" id="" cols="15" rows="1"
-                      placeholder=""></textarea><br />
-            <button type="submit">Añadir producto</button>
+    <div class="top-bar">
+        <a th:href="@{/admin/services}" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i> Volver al Panel Operativo
+        </a>
+    </div>
+
+    <div class="form-card">
+        <div class="card-header">
+            <div class="icon-badge">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <h2>Nuevo Producto</h2>
+            <p>Registra un platillo o bebida en el catálogo de SIPAGO</p>
+        </div>
+
+        <form th:action="@{/addingProduct}" method="post">
+            <div class="form-group">
+                <label for="pname">Nombre del producto</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-burger field-icon"></i>
+                    <input type="text" id="pname" name="pname" class="form-control"
+                           placeholder="Ej. Pupusas Revueltas (Orden de 3)" minlength="2" required />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pprice">Precio unitario ($ USD)</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-dollar-sign field-icon"></i>
+                    <input type="number" id="pprice" name="pprice" class="form-control"
+                           placeholder="Ej. 3.50" step="0.01" min="0.01" required />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pdescription">Descripción del producto</label>
+                <div class="input-wrapper textarea-wrapper">
+                    <i class="fa-solid fa-align-left field-icon"></i>
+                    <textarea id="pdescription" name="pdescription" class="form-control"
+                              placeholder="Ingredientes, presentación o detalles del platillo..." required></textarea>
+                </div>
+            </div>
+
+            <div class="actions-row">
+                <a th:href="@{/admin/services}" class="btn-cancel">Cancelar</a>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-plus"></i> Añadir Producto
+                </button>
+            </div>
         </form>
-    </div> 
+    </div>
 </body>
 </html>
