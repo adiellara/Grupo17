@@ -35,3 +35,8 @@ build/
 ### Environment ###
 .env
 .env.*
+
+# Archivos de configuración local con credenciales
+application-local.properties
+application-dev.properties
+
